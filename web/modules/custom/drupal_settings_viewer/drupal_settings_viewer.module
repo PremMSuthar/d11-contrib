@@ -1,0 +1,91 @@
+<?php
+
+/**
+ * @file
+ * Contains drupal_settings_viewer.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function drupal_settings_viewer_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the drupal_settings_viewer module.
+    case 'help.page.drupal_settings_viewer':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Drupal Settings Viewer module provides a toolbar item for developers to view the drupalSettings object for the current page. This is useful for debugging and understanding what data is available to JavaScript on the frontend.') . '</p>';
+      $output .= '<h3>' . t('Usage') . '</h3>';
+      $output .= '<p>' . t('After enabling the module and granting the "Access Drupal Settings Viewer" permission to appropriate users, a "Settings" item will appear in the toolbar. Clicking this item will open a dropdown tray showing the current drupalSettings object in an expandable tree format.') . '</p>';
+      $output .= '<h3>' . t('Security') . '</h3>';
+      $output .= '<p>' . t('This module should only be used in development environments. The drupalSettings object may contain sensitive information that should not be exposed to unauthorized users. Always restrict the "Access Drupal Settings Viewer" permission to trusted developers only.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function drupal_settings_viewer_theme() {
+  return [
+    'drupal_settings_viewer' => [
+      'variables' => [],
+      'template' => 'drupal-settings-viewer',
+    ],
+    'drupal_settings_viewer_tray' => [
+      'variables' => [],
+      'template' => 'drupal-settings-viewer-tray',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_toolbar().
+ */
+function drupal_settings_viewer_toolbar() {
+  $items = [];
+
+  // Only show the toolbar item if the user has permission.
+  if (\Drupal::currentUser()->hasPermission('access drupal settings viewer')) {
+    $items['drupal_settings_viewer'] = [
+      '#type' => 'toolbar_item',
+      'tab' => [
+        '#type' => 'html_tag',
+        '#tag' => 'button',
+        '#value' => t('Settings'),
+        '#attributes' => [
+          'title' => t('View Drupal Settings'),
+          'class' => ['toolbar-icon', 'toolbar-icon-settings-viewer', 'toolbar-item'],
+          'aria-pressed' => 'false',
+          'type' => 'button',
+        ],
+      ],
+      'tray' => [
+        '#heading' => t('Drupal Settings'),
+        'content' => [
+          '#theme' => 'drupal_settings_viewer_tray',
+          '#attached' => [
+            'library' => [
+              'drupal_settings_viewer/settings_viewer',
+            ],
+          ],
+        ],
+      ],
+      '#weight' => 999,
+      '#cache' => [
+        'contexts' => ['user.permissions'],
+      ],
+      '#attached' => [
+        'library' => [
+          'drupal_settings_viewer/toolbar_icon',
+        ],
+      ],
+    ];
+  }
+
+  return $items;
+}

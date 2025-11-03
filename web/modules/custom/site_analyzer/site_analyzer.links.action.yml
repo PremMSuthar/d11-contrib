@@ -1,0 +1,31 @@
+# Action links for Site Analyzer - DISABLED
+# Commented out to remove local actions block from all pages
+
+# site_analyzer.export_json:
+#   route_name: site_analyzer.export
+#   route_parameters:
+#     format: 'json'
+#   title: 'Export JSON'
+#   appears_on:
+#     - site_analyzer.dashboard
+#     - site_analyzer.module_analysis
+#     - site_analyzer.upgrade_report
+#   weight: 1
+
+# site_analyzer.export_csv:
+#   route_name: site_analyzer.export
+#   route_parameters:
+#     format: 'csv'
+#   title: 'Export CSV'
+#   appears_on:
+#     - site_analyzer.dashboard
+#     - site_analyzer.module_analysis
+#     - site_analyzer.upgrade_report
+#   weight: 2
+
+# site_analyzer.settings_link:
+#   route_name: site_analyzer.settings
+#   title: 'Configure Settings'
+#   appears_on:
+#     - site_analyzer.dashboard
+#   weight: 10

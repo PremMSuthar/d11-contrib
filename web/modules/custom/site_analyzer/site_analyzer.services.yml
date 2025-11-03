@@ -1,0 +1,54 @@
+services:
+  site_analyzer.system_analyzer:
+    class: Drupal\site_analyzer\Service\SystemAnalyzer
+    arguments: ['@database', '@module_handler', '@theme_handler', '@config.factory', '@state', '@file_system']
+
+  site_analyzer.module_analyzer:
+    class: Drupal\site_analyzer\Service\ModuleAnalyzer
+    arguments: ['@extension.list.module', '@module_handler', '@config.factory', '@http_client']
+
+  site_analyzer.theme_analyzer:
+    class: Drupal\site_analyzer\Service\ThemeAnalyzer
+    arguments: ['@theme_handler', '@extension.list.theme', '@config.factory']
+
+  site_analyzer.content_analyzer:
+    class: Drupal\site_analyzer\Service\ContentAnalyzer
+    arguments: ['@entity_type.manager', '@entity_field.manager', '@database']
+
+  site_analyzer.database_analyzer:
+    class: Drupal\site_analyzer\Service\DatabaseAnalyzer
+    arguments: ['@database', '@entity_type.manager']
+
+  site_analyzer.code_analyzer:
+    class: Drupal\site_analyzer\Service\CodeAnalyzer
+    arguments: ['@file_system', '@extension.list.module', '@extension.list.theme']
+
+  site_analyzer.performance_analyzer:
+    class: Drupal\site_analyzer\Service\PerformanceAnalyzer
+    arguments: ['@database', '@cache.default', '@config.factory']
+
+  site_analyzer.security_analyzer:
+    class: Drupal\site_analyzer\Service\SecurityAnalyzer
+    arguments: ['@module_handler', '@config.factory', '@file_system', '@user.permissions']
+
+  site_analyzer.watchdog_analyzer:
+    class: Drupal\site_analyzer\Service\WatchdogAnalyzer
+    arguments: ['@database', '@module_handler']
+
+  site_analyzer.best_practices_analyzer:
+    class: Drupal\site_analyzer\Service\BestPracticesAnalyzer
+    arguments: ['@config.factory', '@module_handler', '@file_system']
+
+  site_analyzer.report_generator:
+    class: Drupal\site_analyzer\Service\ReportGenerator
+    arguments: 
+      - '@site_analyzer.system_analyzer'
+      - '@site_analyzer.module_analyzer'
+      - '@site_analyzer.theme_analyzer'
+      - '@site_analyzer.content_analyzer'
+      - '@site_analyzer.database_analyzer'
+      - '@site_analyzer.code_analyzer'
+      - '@site_analyzer.performance_analyzer'
+      - '@site_analyzer.security_analyzer'
+      - '@renderer'
+      - '@config.factory'

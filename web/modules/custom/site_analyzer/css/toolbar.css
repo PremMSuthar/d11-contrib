@@ -1,0 +1,111 @@
+/**
+ * @file
+ * Site Analyzer Toolbar Integration Styles
+ */
+
+/* Toolbar Icon */
+.toolbar-icon-site-analyzer:before {
+  content: "🔍";
+  font-size: 16px;
+  line-height: 1;
+}
+
+.toolbar-icon-site-analyzer {
+  background-image: none !important;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Toolbar Tray Styling */
+.toolbar-tray .toolbar-menu .site-analyzer-menu {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px;
+}
+
+.toolbar-tray .toolbar-menu .site-analyzer-menu a {
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 2px 0;
+}
+
+.toolbar-tray .toolbar-menu .site-analyzer-menu a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  transform: translateX(5px);
+}
+
+.toolbar-tray .toolbar-menu .site-analyzer-menu a:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Enhanced Toolbar Menu */
+.toolbar-menu .site-analyzer-enhanced {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-menu .analyzer-section {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  border-left: 4px solid #667eea;
+}
+
+.toolbar-menu .analyzer-section h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.toolbar-menu .analyzer-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toolbar-menu .analyzer-section li {
+  margin: 5px 0;
+}
+
+.toolbar-menu .analyzer-section a {
+  color: #495057;
+  text-decoration: none;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.toolbar-menu .analyzer-section a:hover {
+  background: #e9ecef;
+  color: #667eea;
+}
+
+/* Responsive Toolbar */
+@media (max-width: 768px) {
+  .toolbar-menu .site-analyzer-enhanced {
+    grid-template-columns: 1fr;
+    padding: 15px;
+  }
+  
+  .toolbar-menu .analyzer-section {
+    padding: 12px;
+  }
+}

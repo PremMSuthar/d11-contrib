@@ -1,0 +1,447 @@
+{#
+/**
+ * @file
+ * Template for comprehensive Database Analysis Report.
+ *
+ * Available variables:
+ * - database_data: Comprehensive database analysis data
+ * - recommendations: Database optimization recommendations
+ */
+#}
+
+<div class="site-analyzer-database-report">
+  <div class="database-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">🗜️</span>
+        {{ 'Database Analysis Report'|t }}
+      </h1>
+      <p class="page-description">
+        {{ 'Comprehensive analysis of all database tables, fields, and data volumes for optimization and planning.'|t }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary refresh-btn" data-action="refresh">
+        <span class="btn-icon">🔄</span>
+        {{ 'Refresh Analysis'|t }}
+      </button>
+      <div class="dropdown export-dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button">
+          <span class="btn-icon">📊</span>
+          {{ 'Export Report'|t }}
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="dropdown-menu">
+          <a href="#" class="dropdown-item export-btn" data-format="json">{{ 'Detailed JSON Report'|t }}</a>
+          <a href="#" class="dropdown-item export-btn" data-format="csv">{{ 'Tables Summary CSV'|t }}</a>
+          <a href="#" class="dropdown-item export-btn" data-format="excel">{{ 'Database Analysis Excel'|t }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {# Database Summary Cards #}
+  <div class="database-summary">
+    <h2>{{ 'Database Overview'|t }}</h2>
+    <div class="summary-grid">
+      <div class="summary-card database-info">
+        <div class="card-icon">🗄️</div>
+        <div class="card-content">
+          <div class="card-title">{{ 'Database Information'|t }}</div>
+          <div class="card-details">
+            <div class="detail-item">
+              <span class="detail-label">{{ 'Name:'|t }}</span>
+              <span class="detail-value">{{ database_data.summary.database_name|default('Unknown') }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'Type:'|t }}</span>
+              <span class="detail-value">{{ database_data.summary.database_type|default('Unknown')|upper }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'Analyzed:'|t }}</span>
+              <span class="detail-value">{{ database_data.summary.analysis_timestamp|default('now'|date('U'))|date('Y-m-d H:i:s') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card tables-count">
+        <div class="card-icon">📋</div>
+        <div class="card-content">
+          <div class="card-number">{{ database_data.summary.total_tables|default(0) }}</div>
+          <div class="card-label">{{ 'Total Tables'|t }}</div>
+          <div class="card-breakdown">
+            <span class="breakdown-item">{{ database_data.statistics.tables_by_type.drupal_core|default(0) }} {{ 'Core'|t }}</span>
+            <span class="breakdown-item">{{ database_data.statistics.tables_by_type.contrib_module|default(0) }} {{ 'Contrib'|t }}</span>
+            <span class="breakdown-item">{{ database_data.statistics.tables_by_type.custom_module|default(0) }} {{ 'Custom'|t }}</span>
+            <span class="breakdown-item">{{ database_data.statistics.tables_by_type.cache|default(0) }} {{ 'Cache'|t }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card database-size">
+        <div class="card-icon">💾</div>
+        <div class="card-content">
+          <div class="card-number">{{ (database_data.summary.total_size|default(0))|number_format(2) }} MB</div>
+          <div class="card-label">{{ 'Total Database Size'|t }}</div>
+          <div class="card-progress">
+            <div class="size-breakdown">
+              {% set largest_tables = database_data.statistics.largest_tables|default([]) %}
+              {% if largest_tables|length > 0 %}
+                <span class="breakdown-text">{{ 'Largest: '|t }}{{ largest_tables[0].name }} ({{ largest_tables[0].size_mb|number_format(2) }} MB)</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card data-volume">
+        <div class="card-icon">📊</div>
+        <div class="card-content">
+          <div class="card-number">{{ database_data.summary.total_rows|default(0)|number_format }}</div>
+          <div class="card-label">{{ 'Total Records'|t }}</div>
+          <div class="card-breakdown">
+            <span class="breakdown-item">{{ database_data.statistics.index_analysis.total_indexes|default(0) }} {{ 'Indexes'|t }}</span>
+            <span class="breakdown-item">{{ database_data.statistics.index_analysis.unique_indexes|default(0) }} {{ 'Unique'|t }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Field Types Statistics #}
+  {% if database_data.statistics.field_types is defined and database_data.statistics.field_types is not empty %}
+  <div class="field-types-analysis">
+    <h3>{{ 'Field Types Distribution'|t }}</h3>
+    <div class="field-types-grid">
+      {% set max_count = 0 %}
+      {% for field_type, count in database_data.statistics.field_types %}
+        {% if count > max_count %}
+          {% set max_count = count %}
+        {% endif %}
+      {% endfor %}
+      
+      {% for field_type, count in database_data.statistics.field_types|slice(0, 12) %}
+        <div class="field-type-item">
+          <div class="field-type-name">{{ field_type|upper }}</div>
+          <div class="field-type-count">{{ count }}</div>
+          <div class="field-type-bar">
+            {% set percentage = max_count > 0 ? (count / max_count * 100) : 0 %}
+            <div class="bar-fill" style="width: {{ percentage }}%"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Largest Tables #}
+  {% if database_data.statistics.largest_tables is defined and database_data.statistics.largest_tables is not empty %}
+  <div class="largest-tables">
+    <h3>{{ 'Largest Tables by Size'|t }}</h3>
+    <div class="largest-tables-list">
+      {% for table in database_data.statistics.largest_tables %}
+        <div class="large-table-item">
+          <div class="table-info">
+            <div class="table-name">{{ table.name }}</div>
+            <div class="table-category">{{ (table.category|default(''))|replace({'_': ' '})|title }}</div>
+          </div>
+          <div class="table-metrics">
+            <div class="table-size">{{ table.size_mb|number_format(2) }} MB</div>
+            <div class="table-rows">{{ table.row_count|number_format }} {{ 'rows'|t }}</div>
+          </div>
+          <div class="table-bar">
+            {% set max_size = database_data.statistics.largest_tables[0].size_mb %}
+            {% set percentage = max_size > 0 ? (table.size_mb / max_size * 100) : 0 %}
+            <div class="bar-fill" style="width: {{ percentage }}%"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Filter and Search Bar #}
+  <div class="tables-filter-bar">
+    <div class="filter-section">
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="{{ 'Search tables...'|t }}" id="table-search">
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+    
+    <div class="filter-section">
+      <select class="filter-select" id="category-filter">
+        <option value="all">{{ 'All Categories'|t }}</option>
+        <option value="drupal_core">{{ 'Drupal Core'|t }}</option>
+        <option value="contrib_module">{{ 'Contrib Modules'|t }}</option>
+        <option value="custom_module">{{ 'Custom Modules'|t }}</option>
+        <option value="cache">{{ 'Cache Tables'|t }}</option>
+        <option value="other">{{ 'Other'|t }}</option>
+      </select>
+      
+      <select class="filter-select" id="size-filter">
+        <option value="all">{{ 'All Sizes'|t }}</option>
+        <option value="large">{{ 'Large (>10MB)'|t }}</option>
+        <option value="medium">{{ 'Medium (1-10MB)'|t }}</option>
+        <option value="small">{{ 'Small (<1MB)'|t }}</option>
+        <option value="empty">{{ 'Empty Tables'|t }}</option>
+      </select>
+      
+      <select class="filter-select" id="rows-filter">
+        <option value="all">{{ 'All Row Counts'|t }}</option>
+        <option value="high">{{ 'High (>10K rows)'|t }}</option>
+        <option value="medium">{{ 'Medium (1K-10K rows)'|t }}</option>
+        <option value="low">{{ 'Low (<1K rows)'|t }}</option>
+        <option value="empty">{{ 'No Data'|t }}</option>
+      </select>
+    </div>
+    
+    <div class="filter-section">
+      <button class="btn btn-outline clear-filters-btn">{{ 'Clear Filters'|t }}</button>
+      <button class="btn btn-outline toggle-details-btn">{{ 'Toggle Details'|t }}</button>
+    </div>
+  </div>
+
+  {# Comprehensive Tables List #}
+  <div class="tables-analysis">
+    <h3>{{ 'All Database Tables'|t }}</h3>
+    <div class="tables-container">
+      {% if database_data.tables is defined and database_data.tables is not empty %}
+        {% for table_name, table in database_data.tables %}
+          <div class="table-card" 
+               data-name="{{ table_name }}" 
+               data-category="{{ table.category|default('other') }}" 
+               data-size="{{ table.size_mb|default(0) }}" 
+               data-rows="{{ table.row_count|default(0) }}">
+            
+            <div class="table-header">
+              <div class="table-title">
+                <h4 class="table-name">{{ table_name }}</h4>
+                <span class="table-category-badge category-{{ table.category|default('other') }}">{{ (table.category|default(''))|replace({'_': ' '})|title }}</span>
+              </div>
+              <div class="table-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">{{ 'Size:'|t }}</span>
+                  <span class="metric-value">{{ table.size_mb|default(0)|number_format(2) }} MB</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ 'Rows:'|t }}</span>
+                  <span class="metric-value">{{ table.row_count|default(0)|number_format }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ 'Fields:'|t }}</span>
+                  <span class="metric-value">{{ table.fields|default([])|length }}</span>
+                </div>
+              </div>
+              <button class="table-toggle" data-target="{{ table_name }}" aria-expanded="false">
+                <span class="toggle-icon">▼</span>
+              </button>
+            </div>
+            
+            {% if table.description %}
+              <div class="table-description">{{ table.description }}</div>
+            {% endif %}
+            
+            <div class="table-details" id="details-{{ table_name }}" style="display: none;">
+              
+              {# Primary Key Information #}
+              {% if table.primary_key is defined and table.primary_key is not empty %}
+                <div class="detail-section">
+                  <h5>{{ 'Primary Key'|t }}</h5>
+                  <div class="primary-key-info">
+                    {% for column in table.primary_key %}
+                      <span class="key-column">{{ column }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              
+              {# Fields Information #}
+              {% if table.fields is defined and table.fields is not empty %}
+                <div class="detail-section">
+                  <h5>{{ 'Fields'|t }} ({{ table.fields|length }})</h5>
+                  <div class="fields-table">
+                    <table class="fields-list">
+                      <thead>
+                        <tr>
+                          <th>{{ 'Field Name'|t }}</th>
+                          <th>{{ 'Type'|t }}</th>
+                          <th>{{ 'Nullable'|t }}</th>
+                          <th>{{ 'Default'|t }}</th>
+                          <th>{{ 'Key'|t }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for field in table.fields %}
+                          <tr>
+                            <td class="field-name">{{ field.name|default('') }}</td>
+                            <td class="field-type">
+                              <span class="type-badge type-{{ (field.type|default(''))|lower|replace({' ': '-'}) }}">{{ field.type|default('') }}</span>
+                              {% if field.max_length %}
+                                <span class="field-length">({{ field.max_length }})</span>
+                              {% endif %}
+                            </td>
+                            <td class="field-nullable">
+                              {% if field.nullable %}
+                                <span class="nullable-yes">✓</span>
+                              {% else %}
+                                <span class="nullable-no">✗</span>
+                              {% endif %}
+                            </td>
+                            <td class="field-default">
+                              {% if field.default_value %}
+                                <code>{{ field.default_value }}</code>
+                              {% else %}
+                                <span class="no-default">—</span>
+                              {% endif %}
+                            </td>
+                            <td class="field-key">
+                              {% if field.key_type %}
+                                <span class="key-badge key-{{ field.key_type|lower }}">{{ field.key_type }}</span>
+                              {% else %}
+                                <span class="no-key">—</span>
+                              {% endif %}
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              {% endif %}
+              
+              {# Indexes Information #}
+              {% if table.indexes is defined and table.indexes is not empty %}
+                <div class="detail-section">
+                  <h5>{{ 'Indexes'|t }} ({{ table.indexes|length }})</h5>
+                  <div class="indexes-list">
+                    {% for index in table.indexes %}
+                      <div class="index-item">
+                        <div class="index-name">{{ index.name|default('') }}</div>
+                        {% if index.unique is defined %}
+                          <div class="index-type">
+                            {% if index.unique %}
+                              <span class="index-badge unique">{{ 'Unique'|t }}</span>
+                            {% else %}
+                              <span class="index-badge regular">{{ 'Regular'|t }}</span>
+                            {% endif %}
+                            {% if index.type %}
+                              <span class="index-type-badge">{{ index.type }}</span>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                        {% if index.columns is defined and index.columns is not empty %}
+                          <div class="index-columns">
+                            {{ 'Columns:'|t }}
+                            {% for column in index.columns %}
+                              <span class="index-column">{{ column }}</span>{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                          </div>
+                        {% elseif index.definition %}
+                          <div class="index-definition">
+                            <code>{{ index.definition }}</code>
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              
+              {# Foreign Keys Information #}
+              {% if table.foreign_keys is defined and table.foreign_keys is not empty %}
+                <div class="detail-section">
+                  <h5>{{ 'Foreign Keys'|t }} ({{ table.foreign_keys|length }})</h5>
+                  <div class="foreign-keys-list">
+                    {% for fk in table.foreign_keys %}
+                      <div class="foreign-key-item">
+                        <span class="fk-column">{{ fk.column|default('') }}</span>
+                        <span class="fk-arrow">→</span>
+                        <span class="fk-reference">{{ fk.referenced_table|default('') }}.{{ fk.referenced_column|default('') }}</span>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              
+              {# Error Information #}
+              {% if table.error is defined %}
+                <div class="detail-section error-section">
+                  <h5>{{ 'Analysis Error'|t }}</h5>
+                  <div class="error-message">{{ table.error }}</div>
+                </div>
+              {% endif %}
+              
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">🗄️</div>
+          <div class="empty-message">{{ 'No database tables found or analysis failed.'|t }}</div>
+          <div class="empty-action">
+            <button class="btn btn-primary refresh-btn" data-action="refresh">
+              {{ 'Retry Analysis'|t }}
+            </button>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Recommendations Section #}
+  {% if recommendations is defined and recommendations is not empty %}
+  <div class="database-recommendations">
+    <h3>{{ 'Database Optimization Recommendations'|t }}</h3>
+    <div class="recommendations-list">
+      {% for recommendation in recommendations %}
+        <div class="recommendation-item recommendation-{{ recommendation.type }}">
+          <div class="recommendation-icon">
+            {% if recommendation.type == 'error' %}🔴
+            {% elseif recommendation.type == 'warning' %}🟡
+            {% else %}🔵{% endif %}
+          </div>
+          <div class="recommendation-content">
+            <div class="recommendation-message">{{ recommendation.message }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Index Analysis Issues #}
+  {% if database_data.statistics.index_analysis.large_tables_without_indexes is defined and database_data.statistics.index_analysis.large_tables_without_indexes is not empty %}
+  <div class="index-issues">
+    <h3>{{ 'Performance Concerns'|t }}</h3>
+    <div class="issues-list">
+      <div class="issue-item">
+        <div class="issue-title">{{ 'Large Tables Without Indexes'|t }}</div>
+        <div class="issue-description">{{ 'These tables have significant data but may lack proper indexing:'|t }}</div>
+        <div class="issue-tables">
+          {% for table in database_data.statistics.index_analysis.large_tables_without_indexes %}
+            <span class="issue-table">{{ table.name }} ({{ table.row_count|number_format }} {{ 'rows'|t }})</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Loading Overlay #}
+  <div class="loading-overlay" style="display: none;">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div class="loading-text">{{ 'Analyzing database...'|t }}</div>
+    </div>
+  </div>
+</div>"

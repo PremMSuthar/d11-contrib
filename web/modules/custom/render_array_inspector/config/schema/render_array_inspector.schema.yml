@@ -1,0 +1,13 @@
+render_array_inspector.settings:
+  type: config_object
+  label: 'Render Array Inspector settings'
+  mapping:
+    max_depth:
+      type: integer
+      label: 'Maximum depth'
+    auto_expand:
+      type: boolean
+      label: 'Auto-expand first level'
+    show_cache_info:
+      type: boolean
+      label: 'Show cache information'

@@ -1,0 +1,1995 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer Performance Analysis with Site Audit Insights.
+ *
+ * Available variables:
+ * - performance_data: Array containing performance analysis data
+ */
+#}
+
+<div class="site-analyzer-performance">
+  <div class="unified-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">⚡</span>
+        {{ 'Performance Analysis'|t }}
+      </h1>
+      <p class="page-description">
+        {{ 'Comprehensive performance analysis with Google PageSpeed Insights integration'|t }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary refresh-btn" onclick="refreshPerformanceAnalysis()">
+        <span class="btn-icon">🔄</span>
+        {{ 'Refresh Analysis'|t }}
+      </button>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {% if performance_data %}
+    <div class="performance-analysis-content">
+      
+      {# Google PageSpeed Insights Section #}
+      {% if performance_data.insights %}
+        <div class="analysis-section pagespeed-insights">
+          <h2>{{ 'Google PageSpeed Insights'|t }}</h2>
+          
+          <div class="insights-overview">
+            <div class="insights-tabs">
+              <button class="tab-button active" data-tab="mobile">📱 {{ 'Mobile'|t }}</button>
+              <button class="tab-button" data-tab="desktop">🖥️ {{ 'Desktop'|t }}</button>
+            </div>
+            
+            {# Mobile Insights #}
+            <div class="tab-content active" id="mobile-tab">
+              <div class="scores-grid">
+                <div class="score-card performance">
+                  <div class="score-circle score-{{ performance_data.insights.mobile.performance_score >= 90 ? 'good' : (performance_data.insights.mobile.performance_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.mobile.performance_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'Performance'|t }}</div>
+                </div>
+                <div class="score-card accessibility">
+                  <div class="score-circle score-{{ performance_data.insights.mobile.accessibility_score >= 90 ? 'good' : (performance_data.insights.mobile.accessibility_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.mobile.accessibility_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'Accessibility'|t }}</div>
+                </div>
+                <div class="score-card best-practices">
+                  <div class="score-circle score-{{ performance_data.insights.mobile.best_practices_score >= 90 ? 'good' : (performance_data.insights.mobile.best_practices_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.mobile.best_practices_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'Best Practices'|t }}</div>
+                </div>
+                <div class="score-card seo">
+                  <div class="score-circle score-{{ performance_data.insights.mobile.seo_score >= 90 ? 'good' : (performance_data.insights.mobile.seo_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.mobile.seo_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'SEO'|t }}</div>
+                </div>
+              </div>
+              
+              <div class="metrics-grid">
+                {% for metric_key, metric in performance_data.insights.mobile.metrics %}
+                  <div class="metric-item metric-{{ (metric.score * 100)|round >= 90 ? 'good' : ((metric.score * 100)|round >= 50 ? 'average' : 'poor') }}">
+                    <div class="metric-header">
+                      <div class="metric-label">{{ metric_key|replace({'_': ' '})|title }}</div>
+                      <div class="metric-score score-{{ (metric.score * 100)|round >= 90 ? 'good' : ((metric.score * 100)|round >= 50 ? 'average' : 'poor') }}">{{ (metric.score * 100)|round }}</div>
+                    </div>
+                    <div class="metric-value">{{ metric.displayValue }}</div>
+                    <div class="metric-description">{{ metric.description }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+              
+              {# Field Data (Real User Metrics) #}
+              {% if performance_data.insights.mobile.field_data %}
+                <div class="field-data-section">
+                  <h4>{{ 'Real User Experience (CrUX Data)'|t }}</h4>
+                  <div class="field-metrics">
+                    {% for metric_key, metric_data in performance_data.insights.mobile.field_data.metrics %}
+                      <div class="field-metric">
+                        <div class="field-metric-title">{{ metric_key|replace({'_': ' '})|title }}</div>
+                        <div class="field-metric-value">{{ 'P75:'|t }} {{ metric_data.percentiles.p75 }}{{ metric_key == 'cumulative_layout_shift' ? '' : (metric_key == 'first_input_delay' ? 'ms' : 'ms') }}</div>
+                        <div class="histogram">
+                          {% for bucket in metric_data.histogram %}
+                            <div class="histogram-bar histogram-{{ loop.index0 == 0 ? 'good' : (loop.index0 == 1 ? 'average' : 'poor') }}" style="width: {{ (bucket.density * 100)|round }}%">
+                              <span class="histogram-label">{{ (bucket.density * 100)|round }}%</span>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+            
+            {# Desktop Insights #}
+            <div class="tab-content" id="desktop-tab">
+              <div class="scores-grid">
+                <div class="score-card performance">
+                  <div class="score-circle score-{{ performance_data.insights.desktop.performance_score >= 90 ? 'good' : (performance_data.insights.desktop.performance_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.desktop.performance_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'Performance'|t }}</div>
+                </div>
+                <div class="score-card accessibility">
+                  <div class="score-circle score-{{ performance_data.insights.desktop.accessibility_score >= 90 ? 'good' : (performance_data.insights.desktop.accessibility_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.desktop.accessibility_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'Accessibility'|t }}</div>
+                </div>
+                <div class="score-card best-practices">
+                  <div class="score-circle score-{{ performance_data.insights.desktop.best_practices_score >= 90 ? 'good' : (performance_data.insights.desktop.best_practices_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.desktop.best_practices_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'Best Practices'|t }}</div>
+                </div>
+                <div class="score-card seo">
+                  <div class="score-circle score-{{ performance_data.insights.desktop.seo_score >= 90 ? 'good' : (performance_data.insights.desktop.seo_score >= 50 ? 'average' : 'poor') }}">
+                    <span class="score-number">{{ performance_data.insights.desktop.seo_score }}</span>
+                  </div>
+                  <div class="score-label">{{ 'SEO'|t }}</div>
+                </div>
+              </div>
+              
+              <div class="metrics-grid">
+                {% for metric_key, metric in performance_data.insights.desktop.metrics %}
+                  <div class="metric-item metric-{{ (metric.score * 100)|round >= 90 ? 'good' : ((metric.score * 100)|round >= 50 ? 'average' : 'poor') }}">
+                    <div class="metric-header">
+                      <div class="metric-label">{{ metric_key|replace({'_': ' '})|title }}</div>
+                      <div class="metric-score score-{{ (metric.score * 100)|round >= 90 ? 'good' : ((metric.score * 100)|round >= 50 ? 'average' : 'poor') }}">{{ (metric.score * 100)|round }}</div>
+                    </div>
+                    <div class="metric-value">{{ metric.displayValue }}</div>
+                    <div class="metric-description">{{ metric.description }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+              
+              {# Field Data (Real User Metrics) #}
+              {% if performance_data.insights.desktop.field_data %}
+                <div class="field-data-section">
+                  <h4>{{ 'Real User Experience (CrUX Data)'|t }}</h4>
+                  <div class="field-metrics">
+                    {% for metric_key, metric_data in performance_data.insights.desktop.field_data.metrics %}
+                      <div class="field-metric">
+                        <div class="field-metric-title">{{ metric_key|replace({'_': ' '})|title }}</div>
+                        <div class="field-metric-value">{{ 'P75:'|t }} {{ metric_data.percentiles.p75 }}{{ metric_key == 'cumulative_layout_shift' ? '' : (metric_key == 'first_input_delay' ? 'ms' : 'ms') }}</div>
+                        <div class="histogram">
+                          {% for bucket in metric_data.histogram %}
+                            <div class="histogram-bar histogram-{{ loop.index0 == 0 ? 'good' : (loop.index0 == 1 ? 'average' : 'poor') }}" style="width: {{ (bucket.density * 100)|round }}%">
+                              <span class="histogram-label">{{ (bucket.density * 100)|round }}%</span>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# PageSpeed Opportunities #}
+      {% if performance_data.insights.opportunities %}
+        <div class="analysis-section opportunities">
+          <h2>{{ 'Opportunities'|t }}</h2>
+          <div class="opportunities-list">
+            {% for opportunity in performance_data.insights.opportunities %}
+              <div class="opportunity-item score-{{ (opportunity.score * 100)|round >= 90 ? 'good' : ((opportunity.score * 100)|round >= 50 ? 'average' : 'poor') }}">
+                <div class="opportunity-header">
+                  <div class="opportunity-title">{{ opportunity.title }}</div>
+                  <div class="opportunity-savings">{{ opportunity.displayValue }}</div>
+                  <div class="opportunity-score">{{ (opportunity.score * 100)|round }}</div>
+                </div>
+                <div class="opportunity-description">{{ opportunity.description }}</div>
+                
+                {# Detailed breakdown table #}
+                {% if opportunity.details and opportunity.details.items %}
+                  <div class="opportunity-details">
+                    <button class="details-toggle" onclick="toggleDetails('{{ opportunity.id }}')">{{ 'Show Details'|t }}</button>
+                    <div class="details-content" id="details-{{ opportunity.id }}" style="display: none;">
+                      <table class="details-table">
+                        <thead>
+                          <tr>
+                            {% for heading in opportunity.details.headings %}
+                              <th>{{ heading.text }}</th>
+                            {% endfor %}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for item in opportunity.details.items %}
+                            <tr>
+                              {% for heading in opportunity.details.headings %}
+                                <td>
+                                  {% set key = heading.key %}
+                                  {% if heading.itemType == 'url' %}
+                                    <code>{{ item[key] }}</code>
+                                  {% elseif heading.itemType == 'bytes' %}
+                                    {{ (item[key] / 1024)|round(1) }} KB
+                                  {% elseif heading.itemType == 'ms' %}
+                                    {{ item[key] }} ms
+                                  {% else %}
+                                    {{ item[key] }}
+                                  {% endif %}
+                                </td>
+                              {% endfor %}
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {# PageSpeed Diagnostics #}
+      {% if performance_data.insights.diagnostics %}
+        <div class="analysis-section diagnostics">
+          <h2>{{ 'Diagnostics'|t }}</h2>
+          <div class="diagnostics-list">
+            {% for diagnostic in performance_data.insights.diagnostics %}
+              <div class="diagnostic-item score-{{ diagnostic.scoreDisplayMode == 'binary' ? (diagnostic.score == 1 ? 'good' : 'poor') : ((diagnostic.score * 100)|round >= 90 ? 'good' : ((diagnostic.score * 100)|round >= 50 ? 'average' : 'poor')) }}">
+                <div class="diagnostic-header">
+                  <div class="diagnostic-title">{{ diagnostic.title }}</div>
+                  <div class="diagnostic-value">{{ diagnostic.displayValue }}</div>
+                  {% if diagnostic.scoreDisplayMode != 'binary' %}
+                    <div class="diagnostic-score">{{ (diagnostic.score * 100)|round }}</div>
+                  {% endif %}
+                </div>
+                <div class="diagnostic-description">{{ diagnostic.description }}</div>
+                
+                {# Detailed breakdown table #}
+                {% if diagnostic.details and diagnostic.details.items %}
+                  <div class="diagnostic-details">
+                    <button class="details-toggle" onclick="toggleDetails('{{ diagnostic.id }}')">{{ 'Show Details'|t }}</button>
+                    <div class="details-content" id="details-{{ diagnostic.id }}" style="display: none;">
+                      <table class="details-table">
+                        <thead>
+                          <tr>
+                            {% for heading in diagnostic.details.headings %}
+                              <th>{{ heading.text }}</th>
+                            {% endfor %}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for item in diagnostic.details.items %}
+                            <tr>
+                              {% for heading in diagnostic.details.headings %}
+                                <td>
+                                  {% set key = heading.key %}
+                                  {% if heading.itemType == 'url' %}
+                                    <code>{{ item[key] }}</code>
+                                  {% elseif heading.itemType == 'bytes' %}
+                                    {{ (item[key] / 1024)|round(1) }} KB
+                                  {% elseif heading.itemType == 'ms' %}
+                                    {% if item[key] == 0 %}
+                                      {{ 'No cache'|t }}
+                                    {% else %}
+                                      {{ (item[key] / 1000 / 60)|round(1) }} {{ 'min'|t }}
+                                    {% endif %}
+                                  {% elseif heading.itemType == 'numeric' %}
+                                    {{ item[key]|number_format }}
+                                  {% else %}
+                                    {{ item[key] }}
+                                  {% endif %}
+                                </td>
+                              {% endfor %}
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {# Cache Analysis (Site Audit) #}
+      {% if performance_data.cache_detailed_analysis %}
+        <div class="analysis-section cache-analysis">
+          <h2>{{ 'Cache Analysis'|t }}</h2>
+          
+          <div class="cache-status-grid">
+            <div class="cache-status-item">
+              <h3>{{ 'Page Cache'|t }}</h3>
+              <div class="status-indicator status-{{ performance_data.cache_detailed_analysis.page_cache_status.status }}">
+                {{ performance_data.cache_detailed_analysis.page_cache_status.enabled ? 'Enabled'|t : 'Disabled'|t }}
+              </div>
+              {% if performance_data.cache_detailed_analysis.page_cache_status.max_age %}
+                <div class="cache-detail">{{ 'Max Age:'|t }} {{ performance_data.cache_detailed_analysis.page_cache_status.max_age_minutes }} {{ 'minutes'|t }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="cache-status-item">
+              <h3>{{ 'Dynamic Page Cache'|t }}</h3>
+              <div class="status-indicator status-{{ performance_data.cache_detailed_analysis.dynamic_page_cache_status.status }}">
+                {{ performance_data.cache_detailed_analysis.dynamic_page_cache_status.enabled ? 'Enabled'|t : 'Disabled'|t }}
+              </div>
+            </div>
+            
+            <div class="cache-status-item">
+              <h3>{{ 'Render Cache'|t }}</h3>
+              <div class="status-indicator status-{{ performance_data.cache_detailed_analysis.render_cache_status.status }}">
+                {{ performance_data.cache_detailed_analysis.render_cache_status.enabled ? 'Enabled'|t : 'Disabled'|t }}
+              </div>
+            </div>
+          </div>
+
+          {% if performance_data.cache_bins_analysis.bins_used %}
+            <div class="cache-bins">
+              <h3>{{ 'Cache Bins Usage'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Bin'|t }}</th>
+                    <th>{{ 'Items'|t }}</th>
+                    <th>{{ 'Size'|t }}</th>
+                    <th>{{ 'Status'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for bin, info in performance_data.cache_bins_analysis.bins_used %}
+                    <tr>
+                      <td><strong>{{ bin }}</strong></td>
+                      <td>{{ info.item_count|number_format }}</td>
+                      <td>{{ info.size_mb }} MB</td>
+                      <td>
+                        <span class="status-badge status-{{ info.used ? 'pass' : 'warn' }}">
+                          {{ info.used ? 'Active'|t : 'Empty'|t }}
+                        </span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Asset Optimization #}
+      {% if performance_data.asset_optimization %}
+        <div class="analysis-section asset-optimization">
+          <h2>{{ 'Asset Optimization'|t }}</h2>
+          
+          <div class="optimization-grid">
+            <div class="optimization-item">
+              <div class="optimization-title">{{ 'CSS Aggregation'|t }}</div>
+              <div class="status-indicator status-{{ performance_data.asset_optimization.css_aggregation ? 'pass' : 'warn' }}">
+                {{ performance_data.asset_optimization.css_aggregation ? 'Enabled'|t : 'Disabled'|t }}
+              </div>
+              <div class="optimization-detail">{{ 'Files:'|t }} {{ performance_data.asset_optimization.css_files_count }}</div>
+            </div>
+            
+            <div class="optimization-item">
+              <div class="optimization-title">{{ 'JavaScript Aggregation'|t }}</div>
+              <div class="status-indicator status-{{ performance_data.asset_optimization.js_aggregation ? 'pass' : 'warn' }}">
+                {{ performance_data.asset_optimization.js_aggregation ? 'Enabled'|t : 'Disabled'|t }}
+              </div>
+              <div class="optimization-detail">{{ 'Files:'|t }} {{ performance_data.asset_optimization.js_files_count }}</div>
+            </div>
+            
+            <div class="optimization-item">
+              <div class="optimization-title">{{ 'Image Optimization'|t }}</div>
+              <div class="status-indicator status-{{ performance_data.asset_optimization.image_optimization.image_styles_enabled ? 'pass' : 'warn' }}">
+                {{ performance_data.asset_optimization.image_optimization.image_styles_enabled ? 'Image Styles'|t : 'No Image Styles'|t }}
+              </div>
+              <div class="optimization-detail">
+                {{ 'WebP:'|t }} {{ performance_data.asset_optimization.image_optimization.webp_support ? 'Supported'|t : 'Not Supported'|t }}
+              </div>
+            </div>
+            
+            <div class="optimization-item">
+              <div class="optimization-title">{{ 'Compression'|t }}</div>
+              <div class="status-indicator status-{{ performance_data.asset_optimization.compression.gzip_enabled ? 'pass' : 'warn' }}">
+                {{ performance_data.asset_optimization.compression.gzip_enabled ? 'Gzip Enabled'|t : 'No Compression'|t }}
+              </div>
+              <div class="optimization-detail">
+                {{ 'Brotli:'|t }} {{ performance_data.asset_optimization.compression.brotli_enabled ? 'Yes'|t : 'No'|t }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# Memory Usage #}
+      {% if performance_data.memory_usage %}
+        <div class="analysis-section memory-usage">
+          <h2>{{ 'Memory Usage'|t }}</h2>
+          
+          <div class="memory-stats">
+            <div class="memory-stat">
+              <div class="stat-label">{{ 'Current Usage'|t }}</div>
+              <div class="stat-value">{{ (performance_data.memory_usage.current_usage / 1024 / 1024)|round(2) }} MB</div>
+            </div>
+            <div class="memory-stat">
+              <div class="stat-label">{{ 'Peak Usage'|t }}</div>
+              <div class="stat-value">{{ (performance_data.memory_usage.peak_usage / 1024 / 1024)|round(2) }} MB</div>
+            </div>
+            <div class="memory-stat">
+              <div class="stat-label">{{ 'Memory Limit'|t }}</div>
+              <div class="stat-value">{{ (performance_data.memory_usage.memory_limit / 1024 / 1024)|round(2) }} MB</div>
+            </div>
+            <div class="memory-stat">
+              <div class="stat-label">{{ 'Usage Percentage'|t }}</div>
+              <div class="stat-value usage-{{ performance_data.memory_usage.usage_percentage > 80 ? 'high' : (performance_data.memory_usage.usage_percentage > 60 ? 'medium' : 'low') }}">
+                {{ performance_data.memory_usage.usage_percentage }}%
+              </div>
+            </div>
+          </div>
+          
+          {% if performance_data.memory_usage.memory_intensive_modules %}
+            <div class="memory-intensive-modules">
+              <h3>{{ 'Memory-Intensive Modules'|t }}</h3>
+              <div class="modules-list">
+                {% for module in performance_data.memory_usage.memory_intensive_modules %}
+                  <span class="module-badge">{{ module }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Database Performance #}
+      {% if performance_data.database_performance %}
+        <div class="analysis-section database-performance">
+          <h2>{{ 'Database Performance'|t }}</h2>
+          
+          <div class="db-stats-grid">
+            <div class="db-stat">
+              <div class="stat-label">{{ 'Database Size'|t }}</div>
+              <div class="stat-value">{{ performance_data.database_performance.database_size }} MB</div>
+            </div>
+            <div class="db-stat">
+              <div class="stat-label">{{ 'Total Queries'|t }}</div>
+              <div class="stat-value">{{ performance_data.database_performance.query_performance.total_queries|number_format }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="stat-label">{{ 'Slow Queries'|t }}</div>
+              <div class="stat-value">{{ performance_data.database_performance.query_performance.slow_queries }}</div>
+            </div>
+            {% if performance_data.database_performance.query_performance.slow_query_percentage is defined %}
+              <div class="db-stat">
+                <div class="stat-label">{{ 'Slow Query %'|t }}</div>
+                <div class="stat-value">{{ performance_data.database_performance.query_performance.slow_query_percentage }}%</div>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if performance_data.database_performance.table_optimization.large_tables %}
+            <div class="large-tables">
+              <h3>{{ 'Largest Tables'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Table'|t }}</th>
+                    <th>{{ 'Size'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for table in performance_data.database_performance.table_optimization.large_tables %}
+                    <tr>
+                      <td>{{ table.table }}</td>
+                      <td>{{ table.size_mb }} MB</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Site Audit Cache Recommendations #}
+      {% if performance_data.site_audit_cache_recommendations %}
+        <div class="analysis-section cache-recommendations">
+          <h2>{{ 'Cache Recommendations'|t }}</h2>
+          <div class="recommendations-list">
+            {% for recommendation in performance_data.site_audit_cache_recommendations %}
+              <div class="recommendation recommendation-{{ recommendation.type }} priority-{{ recommendation.priority }}">
+                <div class="recommendation-header">
+                  <span class="recommendation-type">{{ recommendation.type|title }}</span>
+                  <span class="recommendation-priority">{{ recommendation.priority|title }}</span>
+                </div>
+                <div class="recommendation-message">{{ recommendation.message }}</div>
+                <div class="recommendation-category">{{ 'Category:'|t }} {{ recommendation.category }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {# System Health Section #}
+      {% if performance_data.system_health %}
+        <div class="analysis-section system-health">
+          <h2>{{ 'System Health'|t }}</h2>
+          
+          {# System Health Overview #}
+          <div class="health-overview">
+            <div class="health-cards">
+              <div class="health-card server-health">
+                <div class="health-icon">🖥️</div>
+                <div class="health-title">{{ 'Server Environment'|t }}</div>
+                <div class="health-status status-{{ performance_data.system_health.server_environment.php.status }}">
+                  {{ 'PHP'|t }} {{ performance_data.system_health.server_environment.php.version }}
+                </div>
+              </div>
+              
+              <div class="health-card drupal-health">
+                <div class="health-icon">🌐</div>
+                <div class="health-title">{{ 'Drupal System'|t }}</div>
+                <div class="health-status status-{{ performance_data.system_health.drupal_system.status }}">
+                  {{ 'Version'|t }} {{ performance_data.system_health.drupal_system.version }}
+                </div>
+              </div>
+              
+              <div class="health-card memory-health">
+                <div class="health-icon">💾</div>
+                <div class="health-title">{{ 'Memory Usage'|t }}</div>
+                <div class="health-status status-{{ performance_data.system_health.performance_metrics.memory.status }}">
+                  {{ performance_data.system_health.performance_metrics.memory.usage_percent }}%
+                </div>
+              </div>
+              
+              <div class="health-card database-health">
+                <div class="health-icon">🗄️</div>
+                <div class="health-title">{{ 'Database'|t }}</div>
+                <div class="health-status status-{{ performance_data.system_health.server_environment.database.status }}">
+                  {{ performance_data.system_health.server_environment.database.size_mb }} MB
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {# Detailed System Information #}
+          <div class="system-details">
+            <div class="system-tabs">
+              <button class="system-tab-button active" data-tab="server">🖥️ {{ 'Server'|t }}</button>
+              <button class="system-tab-button" data-tab="drupal">🌐 {{ 'Drupal'|t }}</button>
+              <button class="system-tab-button" data-tab="performance">⚡ {{ 'Performance'|t }}</button>
+              <button class="system-tab-button" data-tab="security">🔒 {{ 'Security'|t }}</button>
+            </div>
+            
+            {# Server Environment Tab #}
+            <div class="system-tab-content active" id="server-tab">
+              <div class="server-info">
+                <h4>{{ 'PHP Configuration'|t }}</h4>
+                <div class="config-grid">
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Version'|t }}</div>
+                    <div class="config-value status-{{ performance_data.system_health.server_environment.php.status }}">{{ performance_data.system_health.server_environment.php.version }}</div>
+                  </div>
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Memory Limit'|t }}</div>
+                    <div class="config-value">{{ performance_data.system_health.server_environment.php.memory_limit }}</div>
+                  </div>
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Max Execution Time'|t }}</div>
+                    <div class="config-value">{{ performance_data.system_health.server_environment.php.max_execution_time }}s</div>
+                  </div>
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Upload Max Size'|t }}</div>
+                    <div class="config-value">{{ performance_data.system_health.server_environment.php.upload_max_filesize }}</div>
+                  </div>
+                </div>
+                
+                <h4>{{ 'PHP Extensions'|t }}</h4>
+                <div class="extensions-grid">
+                  {% for ext_name, ext_info in performance_data.system_health.server_environment.php.extensions %}
+                    <div class="extension-item status-{{ ext_info.status }}">
+                      <div class="extension-name">{{ ext_name }}</div>
+                      <div class="extension-status">{{ ext_info.loaded ? 'Loaded'|t : 'Missing'|t }}</div>
+                      {% if ext_info.optional is defined and ext_info.optional %}
+                        <div class="extension-optional">{{ 'Optional'|t }}</div>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+                
+                <h4>{{ 'Web Server'|t }}</h4>
+                <div class="config-grid">
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Software'|t }}</div>
+                    <div class="config-value">{{ performance_data.system_health.server_environment.web_server.software }}</div>
+                  </div>
+                  <div class="config-item">
+                    <div class="config-label">{{ 'HTTPS'|t }}</div>
+                    <div class="config-value status-{{ performance_data.system_health.server_environment.web_server.https_enabled ? 'good' : 'warning' }}">
+                      {{ performance_data.system_health.server_environment.web_server.https_enabled ? 'Enabled'|t : 'Disabled'|t }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {# Drupal System Tab #}
+            <div class="system-tab-content" id="drupal-tab">
+              <div class="drupal-info">
+                <h4>{{ 'Drupal Configuration'|t }}</h4>
+                <div class="config-grid">
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Version'|t }}</div>
+                    <div class="config-value status-{{ performance_data.system_health.drupal_system.status }}">{{ performance_data.system_health.drupal_system.version }}</div>
+                  </div>
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Install Profile'|t }}</div>
+                    <div class="config-value">{{ performance_data.system_health.drupal_system.install_profile }}</div>
+                  </div>
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Maintenance Mode'|t }}</div>
+                    <div class="config-value status-{{ performance_data.system_health.drupal_system.maintenance_mode ? 'warning' : 'good' }}">
+                      {{ performance_data.system_health.drupal_system.maintenance_mode ? 'Enabled'|t : 'Disabled'|t }}
+                    </div>
+                  </div>
+                  <div class="config-item">
+                    <div class="config-label">{{ 'Modules Count'|t }}</div>
+                    <div class="config-value">{{ performance_data.system_health.drupal_system.modules_count }}</div>
+                  </div>
+                </div>
+                
+                <h4>{{ 'Cron Status'|t }}</h4>
+                <div class="cron-status status-{{ performance_data.system_health.drupal_system.cron_status.status }}">
+                  <div class="cron-info">
+                    <div class="cron-label">{{ 'Last Run'|t }}</div>
+                    <div class="cron-value">{{ performance_data.system_health.drupal_system.cron_status.last_run_formatted }}</div>
+                  </div>
+                  <div class="cron-info">
+                    <div class="cron-label">{{ 'Hours Since Last Run'|t }}</div>
+                    <div class="cron-value">{{ performance_data.system_health.drupal_system.cron_status.hours_since_last }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {# Performance Tab #}
+            <div class="system-tab-content" id="performance-tab">
+              <div class="performance-info">
+                <h4>{{ 'Memory Usage'|t }}</h4>
+                <div class="memory-stats">
+                  <div class="memory-item">
+                    <div class="memory-label">{{ 'Current Usage'|t }}</div>
+                    <div class="memory-value">{{ performance_data.system_health.performance_metrics.memory.current_mb }} MB</div>
+                  </div>
+                  <div class="memory-item">
+                    <div class="memory-label">{{ 'Peak Usage'|t }}</div>
+                    <div class="memory-value">{{ performance_data.system_health.performance_metrics.memory.peak_mb }} MB</div>
+                  </div>
+                  <div class="memory-item">
+                    <div class="memory-label">{{ 'Memory Limit'|t }}</div>
+                    <div class="memory-value">{{ performance_data.system_health.performance_metrics.memory.limit_mb }} MB</div>
+                  </div>
+                  <div class="memory-item">
+                    <div class="memory-label">{{ 'Usage Percentage'|t }}</div>
+                    <div class="memory-value status-{{ performance_data.system_health.performance_metrics.memory.status }}">{{ performance_data.system_health.performance_metrics.memory.usage_percent }}%</div>
+                  </div>
+                </div>
+                
+                <h4>{{ 'OPcache Status'|t }}</h4>
+                <div class="opcache-status status-{{ performance_data.system_health.performance_metrics.opcache.status }}">
+                  {% if performance_data.system_health.performance_metrics.opcache.enabled %}
+                    <div class="opcache-info">
+                      <div class="opcache-label">{{ 'Status'|t }}</div>
+                      <div class="opcache-value">{{ 'Enabled'|t }}</div>
+                    </div>
+                    {% if performance_data.system_health.performance_metrics.opcache.hit_rate %}
+                      <div class="opcache-info">
+                        <div class="opcache-label">{{ 'Hit Rate'|t }}</div>
+                        <div class="opcache-value">{{ performance_data.system_health.performance_metrics.opcache.hit_rate }}%</div>
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <div class="opcache-disabled">{{ performance_data.system_health.performance_metrics.opcache.message }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            {# Security Tab #}
+            <div class="system-tab-content" id="security-tab">
+              <div class="security-info">
+                <h4>{{ 'File Permissions'|t }}</h4>
+                <div class="security-checks">
+                  <div class="security-check status-{{ performance_data.system_health.security_status.file_permissions.status }}">
+                    <div class="check-label">{{ 'Settings File Writable'|t }}</div>
+                    <div class="check-value">{{ performance_data.system_health.security_status.file_permissions.settings_file_writable ? 'Yes (Warning)'|t : 'No (Good)'|t }}</div>
+                  </div>
+                  <div class="security-check">
+                    <div class="check-label">{{ 'Files Directory Writable'|t }}</div>
+                    <div class="check-value">{{ performance_data.system_health.security_status.file_permissions.files_directory_writable ? 'Yes'|t : 'No'|t }}</div>
+                  </div>
+                </div>
+                
+                <h4>{{ 'Admin Account Security'|t }}</h4>
+                <div class="security-checks">
+                  <div class="security-check status-{{ performance_data.system_health.security_status.admin_account.status }}">
+                    <div class="check-label">{{ 'User #1 Blocked'|t }}</div>
+                    <div class="check-value">{{ performance_data.system_health.security_status.admin_account.user_1_blocked ? 'Yes (Good)'|t : 'No (Warning)'|t }}</div>
+                  </div>
+                </div>
+                
+                <h4>{{ 'Error Reporting'|t }}</h4>
+                <div class="security-checks">
+                  <div class="security-check status-{{ performance_data.system_health.security_status.error_reporting.status }}">
+                    <div class="check-label">{{ 'Display Errors'|t }}</div>
+                    <div class="check-value">{{ performance_data.system_health.security_status.error_reporting.display_errors ? 'On (Warning)'|t : 'Off (Good)'|t }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      
+      {# System Health Recommendations #}
+      {% if performance_data.system_health.recommendations %}
+        <div class="analysis-section system-recommendations">
+          <h2>{{ 'System Health Recommendations'|t }}</h2>
+          <div class="recommendations-list">
+            {% for recommendation in performance_data.system_health.recommendations %}
+              <div class="recommendation recommendation-{{ recommendation.type }} priority-{{ recommendation.priority }}">
+                <div class="recommendation-header">
+                  <span class="recommendation-title">{{ recommendation.title }}</span>
+                  <span class="recommendation-priority">{{ recommendation.priority|title }}</span>
+                </div>
+                <div class="recommendation-message">{{ recommendation.message }}</div>
+                <div class="recommendation-category">{{ 'Category:'|t }} {{ recommendation.category|title }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {# General Performance Recommendations #}
+      {% if performance_data.recommendations %}
+        <div class="analysis-section performance-recommendations">
+          <h2>{{ 'Performance Recommendations'|t }}</h2>
+          <div class="recommendations-list">
+            {% for recommendation in performance_data.recommendations %}
+              <div class="recommendation recommendation-{{ recommendation.category }} priority-{{ recommendation.priority }}">
+                <div class="recommendation-header">
+                  <span class="recommendation-category">{{ recommendation.category|title }}</span>
+                  <span class="recommendation-priority">{{ recommendation.priority|title }}</span>
+                </div>
+                <div class="recommendation-message">{{ recommendation.message }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      {{ 'Performance analysis data is not available. Please check the performance analyzer service.'|t }}
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.site-analyzer-performance {
+  padding: 20px;
+}
+
+.unified-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px 0;
+  font-size: 2.2em;
+  font-weight: 600;
+  color: #333;
+}
+
+.title-icon {
+  margin-right: 12px;
+  font-size: 1.1em;
+}
+
+.page-description {
+  margin: 0;
+  font-size: 1.1em;
+  color: #666;
+  line-height: 1.4;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #0073aa;
+  color: white;
+  border-color: #0073aa;
+}
+
+.btn-primary:hover {
+  background-color: #005a87;
+  border-color: #005a87;
+}
+
+.btn-icon {
+  margin-right: 6px;
+  font-size: 0.9em;
+}
+
+.analysis-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+
+.analysis-section h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+/* PageSpeed Insights Styles */
+.insights-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-size: 16px;
+}
+
+.tab-button.active {
+  border-bottom-color: #0073aa;
+  color: #0073aa;
+  font-weight: bold;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.score-card {
+  text-align: center;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  border: 4px solid;
+  position: relative;
+}
+
+.score-good {
+  border-color: #0cce6b;
+  color: #0cce6b;
+}
+
+.score-average {
+  border-color: #ffa400;
+  color: #ffa400;
+}
+
+.score-poor {
+  border-color: #ff5722;
+  color: #ff5722;
+}
+
+.score-number {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.score-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.metric-item {
+  padding: 15px;
+  background: white;
+  border-radius: 5px;
+  border-left: 4px solid;
+  position: relative;
+}
+
+.metric-item.metric-good {
+  border-left-color: #0cce6b;
+}
+
+.metric-item.metric-average {
+  border-left-color: #ffa400;
+}
+
+.metric-item.metric-poor {
+  border-left-color: #ff5722;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.metric-score {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.metric-score.score-good {
+  background-color: #0cce6b;
+}
+
+.metric-score.score-average {
+  background-color: #ffa400;
+}
+
+.metric-score.score-poor {
+  background-color: #ff5722;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.metric-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Opportunities Styles */
+.opportunities-list {
+  display: grid;
+  gap: 15px;
+}
+
+.opportunity-item {
+  padding: 15px;
+  background: white;
+  border-radius: 5px;
+  border-left: 4px solid;
+}
+
+.opportunity-item.impact-high {
+  border-left-color: #ff5722;
+}
+
+.opportunity-item.impact-medium {
+  border-left-color: #ffa400;
+}
+
+.opportunity-item.impact-low {
+  border-left-color: #4caf50;
+}
+
+.opportunity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.opportunity-title {
+  font-weight: bold;
+  color: #333;
+}
+
+.opportunity-savings {
+  font-weight: bold;
+  color: #0073aa;
+}
+
+.opportunity-description {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.impact-badge {
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.impact-badge.impact-high {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.impact-badge.impact-medium {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.impact-badge.impact-low {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+/* Diagnostics Styles */
+.diagnostics-list {
+  display: grid;
+  gap: 15px;
+}
+
+.diagnostic-item {
+  padding: 15px;
+  background: white;
+  border-radius: 5px;
+  border-left: 4px solid;
+}
+
+.diagnostic-item.status-warning {
+  border-left-color: #ffa400;
+}
+
+.diagnostic-item.status-info {
+  border-left-color: #2196f3;
+}
+
+.diagnostic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.diagnostic-title {
+  font-weight: bold;
+  color: #333;
+}
+
+.diagnostic-value {
+  font-weight: bold;
+  color: #666;
+}
+
+.diagnostic-description {
+  color: #666;
+}
+
+/* Cache Analysis Styles */
+.cache-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.cache-status-item {
+  padding: 20px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.cache-status-item h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.status-indicator {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.status-pass {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+.status-warn {
+  background-color: #fcf8e3;
+  color: #8a6d3b;
+}
+
+.status-fail {
+  background-color: #f2dede;
+  color: #a94442;
+}
+
+.cache-detail {
+  font-size: 14px;
+  color: #666;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+}
+
+.table th,
+.table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Asset Optimization Styles */
+.optimization-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.optimization-item {
+  padding: 20px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.optimization-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.optimization-detail {
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Memory Usage Styles */
+.memory-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.memory-stat {
+  padding: 20px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-value.usage-high {
+  color: #d32f2f;
+}
+
+.stat-value.usage-medium {
+  color: #f57c00;
+}
+
+.stat-value.usage-low {
+  color: #388e3c;
+}
+
+.memory-intensive-modules {
+  margin-top: 20px;
+}
+
+.modules-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.module-badge {
+  padding: 6px 12px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Database Performance Styles */
+.db-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.db-stat {
+  padding: 20px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+/* Recommendations Styles */
+.recommendations-list {
+  display: grid;
+  gap: 15px;
+}
+
+.recommendation {
+  padding: 15px;
+  background: white;
+  border-radius: 5px;
+  border-left: 4px solid #ddd;
+}
+
+.recommendation-error {
+  border-left-color: #d32f2f;
+}
+
+.recommendation-warning {
+  border-left-color: #f57c00;
+}
+
+.recommendation-info {
+  border-left-color: #1976d2;
+}
+
+.recommendation-caching {
+  border-left-color: #388e3c;
+}
+
+.recommendation-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.recommendation-type,
+.recommendation-category {
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.recommendation-priority {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.recommendation-message {
+  color: #333;
+}
+
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+
+/* Field Data Styles */
+.field-data-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.field-data-section h4 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.field-metrics {
+  display: grid;
+  gap: 20px;
+}
+
+.field-metric {
+  background: white;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.field-metric-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.field-metric-value {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.histogram {
+  display: flex;
+  height: 20px;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.histogram-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.histogram-bar.histogram-good {
+  background-color: #0cce6b;
+}
+
+.histogram-bar.histogram-average {
+  background-color: #ffa400;
+}
+
+.histogram-bar.histogram-poor {
+  background-color: #ff5722;
+}
+
+.histogram-label {
+  font-size: 10px;
+}
+
+/* Detailed Tables */
+.opportunity-details,
+.diagnostic-details {
+  margin-top: 15px;
+}
+
+.details-toggle {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.details-toggle:hover {
+  background: #e9ecef;
+}
+
+.details-content {
+  margin-top: 15px;
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.details-table th {
+  background: #f8f9fa;
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+  font-weight: 600;
+}
+
+.details-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.details-table code {
+  background: #f1f3f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+/* Enhanced Opportunity Styles */
+.opportunity-item.score-good {
+  border-left-color: #0cce6b;
+}
+
+.opportunity-item.score-average {
+  border-left-color: #ffa400;
+}
+
+.opportunity-item.score-poor {
+  border-left-color: #ff5722;
+}
+
+.opportunity-score {
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+}
+
+/* Enhanced Diagnostic Styles */
+.diagnostic-item.score-good {
+  border-left-color: #0cce6b;
+}
+
+.diagnostic-item.score-average {
+  border-left-color: #ffa400;
+}
+
+.diagnostic-item.score-poor {
+  border-left-color: #ff5722;
+}
+
+.diagnostic-score {
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+}
+
+/* System Health Styles */
+.system-health {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.system-health h2 {
+  color: white;
+  border-bottom-color: rgba(255,255,255,0.3);
+}
+
+.health-overview {
+  margin-bottom: 30px;
+}
+
+.health-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.health-card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.health-icon {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+
+.health-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: rgba(255,255,255,0.9);
+}
+
+.health-status {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.2);
+}
+
+.health-status.status-good {
+  background: rgba(12, 206, 107, 0.8);
+}
+
+.health-status.status-warning {
+  background: rgba(255, 164, 0, 0.8);
+}
+
+.health-status.status-critical {
+  background: rgba(255, 87, 34, 0.8);
+}
+
+/* System Details Tabs */
+.system-details {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.system-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.system-tab-button {
+  flex: 1;
+  padding: 15px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.system-tab-button:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.system-tab-button.active {
+  color: #0073aa;
+  border-bottom-color: #0073aa;
+  background: white;
+}
+
+.system-tab-content {
+  display: none;
+  padding: 30px;
+  color: #333;
+}
+
+.system-tab-content.active {
+  display: block;
+}
+
+.system-tab-content h4 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 18px;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+/* Configuration Grid */
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.config-item {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #0073aa;
+}
+
+.config-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.config-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.config-value.status-good {
+  color: #0cce6b;
+}
+
+.config-value.status-warning {
+  color: #ffa400;
+}
+
+.config-value.status-critical {
+  color: #ff5722;
+}
+
+/* Extensions Grid */
+.extensions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.extension-item {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid;
+  position: relative;
+}
+
+.extension-item.status-good {
+  border-left-color: #0cce6b;
+}
+
+.extension-item.status-critical {
+  border-left-color: #ff5722;
+}
+
+.extension-item.status-info {
+  border-left-color: #2196f3;
+}
+
+.extension-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.extension-status {
+  font-size: 12px;
+  color: #666;
+}
+
+.extension-optional {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* Memory Stats */
+.memory-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.memory-item {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.memory-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.memory-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.memory-value.status-warning {
+  color: #ffa400;
+}
+
+/* Cron Status */
+.cron-status {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  margin-bottom: 30px;
+}
+
+.cron-status.status-good {
+  border-left-color: #0cce6b;
+}
+
+.cron-status.status-warning {
+  border-left-color: #ffa400;
+}
+
+.cron-status.status-critical {
+  border-left-color: #ff5722;
+}
+
+.cron-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cron-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.cron-value {
+  font-weight: bold;
+  color: #333;
+}
+
+/* OPcache Status */
+.opcache-status {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.opcache-status.status-good {
+  border-left-color: #0cce6b;
+}
+
+.opcache-status.status-warning {
+  border-left-color: #ffa400;
+}
+
+.opcache-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.opcache-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.opcache-value {
+  font-weight: bold;
+  color: #333;
+}
+
+.opcache-disabled {
+  color: #666;
+  font-style: italic;
+}
+
+/* Security Checks */
+.security-checks {
+  margin-bottom: 30px;
+}
+
+.security-check {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.security-check.status-good {
+  border-left-color: #0cce6b;
+}
+
+.security-check.status-warning {
+  border-left-color: #ffa400;
+}
+
+.check-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.check-value {
+  font-weight: bold;
+  color: #666;
+}
+
+/* System Recommendations */
+.system-recommendations .recommendation {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-left: none;
+}
+
+.system-recommendations .recommendation-header {
+  color: white;
+}
+
+.system-recommendations .recommendation-title {
+  color: white;
+  font-weight: bold;
+}
+
+.system-recommendations .recommendation-message {
+  color: rgba(255,255,255,0.9);
+}
+
+.system-recommendations .recommendation-category {
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+}
+</style>
+
+<script>
+// Tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+  // PageSpeed Insights tabs
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+  
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const targetTab = this.getAttribute('data-tab');
+      
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button and corresponding content
+      this.classList.add('active');
+      document.getElementById(targetTab + '-tab').classList.add('active');
+    });
+  });
+  
+  // System Health tabs
+  const systemTabButtons = document.querySelectorAll('.system-tab-button');
+  const systemTabContents = document.querySelectorAll('.system-tab-content');
+  
+  systemTabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const targetTab = this.getAttribute('data-tab');
+      
+      // Remove active class from all system tab buttons and contents
+      systemTabButtons.forEach(btn => btn.classList.remove('active'));
+      systemTabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button and corresponding content
+      this.classList.add('active');
+      document.getElementById(targetTab + '-tab').classList.add('active');
+    });
+  });
+});
+
+function refreshPerformanceAnalysis() {
+  // Show loading state
+  const button = document.querySelector('.refresh-btn');
+  const originalText = button.innerHTML;
+  button.innerHTML = '<span class="btn-icon">⏳</span>' + Drupal.t('Refreshing...');
+  button.disabled = true;
+  
+  // Reload the current page
+  window.location.reload();
+}
+
+// Toggle details function
+function toggleDetails(id) {
+  const detailsContent = document.getElementById('details-' + id);
+  const toggleButton = document.querySelector('[onclick="toggleDetails(\'' + id + '\')"');
+  
+  if (detailsContent.style.display === 'none') {
+    detailsContent.style.display = 'block';
+    toggleButton.textContent = Drupal.t('Hide Details');
+  } else {
+    detailsContent.style.display = 'none';
+    toggleButton.textContent = Drupal.t('Show Details');
+  }
+}
+</script>

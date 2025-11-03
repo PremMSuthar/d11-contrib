@@ -1,0 +1,670 @@
+<?php
+
+/**
+ * @file
+ * Site Analyzer module - Comprehensive site analysis for Drupal upgrade planning.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function site_analyzer_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.site_analyzer':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Site Analyzer module provides comprehensive analysis tools for Drupal sites to help with upgrade planning and development insights.') . '</p>';
+      $output .= '<h3>' . t('Features') . '</h3>';
+      $output .= '<ul>';
+      $output .= '<li>' . t('System Information Analysis - Drupal core version, PHP, database, server details') . '</li>';
+      $output .= '<li>' . t('Module Analysis - Installed modules, versions, compatibility, security updates') . '</li>';
+      $output .= '<li>' . t('Theme Analysis - Active themes, compatibility, template overrides') . '</li>';
+      $output .= '<li>' . t('Content Analysis - Content types, fields, volume, media usage') . '</li>';
+      $output .= '<li>' . t('Database Analysis - Table structure, size, performance insights') . '</li>';
+      $output .= '<li>' . t('Code Quality Analysis - Custom code review, deprecated functions') . '</li>';
+      $output .= '<li>' . t('Performance Metrics - Page load times, cache analysis, bottlenecks') . '</li>';
+      $output .= '<li>' . t('Security Assessment - Security updates, permissions, vulnerabilities') . '</li>';
+      $output .= '<li>' . t('Upgrade Readiness Report - Compatibility matrix, migration recommendations') . '</li>';
+      $output .= '</ul>';
+      $output .= '<h3>' . t('Usage') . '</h3>';
+      $output .= '<p>' . t('Navigate to <em>Administration » Reports » Site Analyzer</em> to access the dashboard and analysis tools.') . '</p>';
+      return $output;
+
+    case 'site_analyzer.dashboard':
+      // Dashboard description removed
+      return '';
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function site_analyzer_theme() {
+  return [
+    'page__site_analyzer' => [
+      'template' => 'page--site-analyzer',
+      'base hook' => 'page',
+    ],
+    'site_analyzer_dashboard' => [
+      'variables' => [
+        'system_info' => NULL,
+        'module_summary' => NULL,
+        'theme_summary' => NULL,
+        'content_summary' => NULL,
+        'security_summary' => NULL,
+        'performance_summary' => NULL,
+        'upgrade_summary' => NULL,
+      ],
+    ],
+    'site_analyzer_report' => [
+      'variables' => [
+        'report_type' => NULL,
+        'report_data' => NULL,
+        'recommendations' => NULL,
+      ],
+    ],
+    'site_analyzer_unified_extensions' => [
+      'variables' => [
+        'unified_data' => NULL,
+        'module_data' => NULL,
+        'theme_data' => NULL,
+        'summary_stats' => NULL,
+      ],
+    ],
+    'site_analyzer_unified_extensions_simple' => [
+      'variables' => [
+        'unified_data' => NULL,
+        'module_data' => NULL,
+        'theme_data' => NULL,
+        'summary_stats' => NULL,
+      ],
+    ],
+    'site_analyzer_comprehensive_extensions' => [
+      'variables' => [
+        'unified_data' => NULL,
+        'module_data' => NULL,
+        'theme_data' => NULL,
+        'summary_stats' => NULL,
+        'analysis_tools' => NULL,
+      ],
+    ],
+    'site_analyzer_module_report' => [
+      'variables' => [
+        'module_data' => NULL,
+        'scan_results' => NULL,
+        'drupal_11_readiness' => NULL,
+        'detailed_analysis' => NULL,
+      ],
+    ],
+    'site_analyzer_content_report' => [
+      'variables' => [
+        'content_data' => NULL,
+        'relationship_diagram' => NULL,
+        'migration_recommendations' => NULL,
+      ],
+    ],
+    'site_analyzer_upgrade_report' => [
+      'variables' => [
+        'compatibility_matrix' => NULL,
+        'breaking_changes' => NULL,
+        'migration_recommendations' => NULL,
+        'effort_estimation' => NULL,
+        'risk_assessment' => NULL,
+      ],
+    ],
+    'site_analyzer_database_report' => [
+      'variables' => [
+        'database_data' => NULL,
+        'recommendations' => NULL,
+      ],
+    ],
+    'site_analyzer_navigation' => [
+      'variables' => [
+        'navigation_items' => NULL,
+        'current_page' => NULL,
+        'breadcrumbs' => NULL,
+      ],
+    ],
+    'site_analyzer_security' => [
+      'variables' => [
+        'security_data' => NULL,
+      ],
+    ],
+    'site_analyzer_watchdog' => [
+      'variables' => [
+        'watchdog_data' => NULL,
+      ],
+    ],
+    'site_analyzer_best_practices' => [
+      'variables' => [
+        'best_practices_data' => NULL,
+      ],
+    ],
+    'site_analyzer_performance' => [
+      'variables' => [
+        'performance_data' => NULL,
+      ],
+      'template' => 'site-analyzer-performance',
+    ],
+    'site_analyzer_system_enhanced' => [
+      'variables' => [
+        'system_data' => NULL,
+        'recommendations' => NULL,
+      ],
+      'template' => 'site-analyzer-system-enhanced',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ */
+function site_analyzer_cron() {
+  $config = \Drupal::config('site_analyzer.settings');
+  
+  // Check if automated monitoring is enabled
+  if ($config->get('automated_monitoring')) {
+    $last_run = \Drupal::state()->get('site_analyzer.last_automated_run', 0);
+    $interval = $config->get('monitoring_interval', 86400); // Default 24 hours
+    
+    if (REQUEST_TIME - $last_run > $interval) {
+      // Run automated analysis
+      $report_generator = \Drupal::service('site_analyzer.report_generator');
+      $report = $report_generator->generateFullReport();
+      
+      // Store the report
+      \Drupal::state()->set('site_analyzer.last_automated_report', $report);
+      \Drupal::state()->set('site_analyzer.last_automated_run', REQUEST_TIME);
+      
+      // Send alerts if configured
+      if ($config->get('send_alerts')) {
+        _site_analyzer_send_alerts($report);
+      }
+    }
+  }
+}
+
+/**
+ * Send alerts based on analysis results.
+ */
+function _site_analyzer_send_alerts($report) {
+  $config = \Drupal::config('site_analyzer.settings');
+  $alert_email = $config->get('alert_email');
+  
+  if (!$alert_email) {
+    return;
+  }
+  
+  $alerts = [];
+  
+  // Check for security issues
+  if (!empty($report['security']['high_risk_issues'])) {
+    $alerts[] = t('High risk security issues detected: @count', ['@count' => count($report['security']['high_risk_issues'])]);
+  }
+  
+  // Check for outdated modules
+  if (!empty($report['modules']['outdated'])) {
+    $alerts[] = t('Outdated modules detected: @count', ['@count' => count($report['modules']['outdated'])]);
+  }
+  
+  // Check for deprecated code
+  if (!empty($report['code']['deprecated_functions'])) {
+    $alerts[] = t('Deprecated functions found: @count', ['@count' => count($report['code']['deprecated_functions'])]);
+  }
+  
+  if (!empty($alerts)) {
+    $mail_manager = \Drupal::service('plugin.manager.mail');
+    $params = [
+      'subject' => t('Site Analyzer Alert - @site', ['@site' => \Drupal::config('system.site')->get('name')]),
+      'alerts' => $alerts,
+      'report_url' => \Drupal\Core\Url::fromRoute('site_analyzer.dashboard', [], ['absolute' => TRUE])->toString(),
+    ];
+    
+    $mail_manager->mail('site_analyzer', 'alert', $alert_email, 'en', $params);
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function site_analyzer_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'alert':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = t('Site Analyzer has detected the following issues:');
+      
+      foreach ($params['alerts'] as $alert) {
+        $message['body'][] = '- ' . $alert['message'];
+      }
+      
+      $message['body'][] = '';
+      $message['body'][] = t('View the full report at: @url', ['@url' => $params['report_url']]);
+      break;
+  }
+}
+
+/**
+ * Implements hook_toolbar().
+ */
+function site_analyzer_toolbar() {
+  $items = [];
+  
+  // Only show for users with permission
+  if (!\Drupal::currentUser()->hasPermission('access site analyzer')) {
+    return $items;
+  }
+  
+  $navigation_items = _site_analyzer_get_navigation_items();
+  
+  $items['site_analyzer'] = [
+    '#type' => 'toolbar_item',
+    'tab' => [
+      '#type' => 'link',
+      '#title' => t('Site Analyzer'),
+      '#url' => \Drupal\Core\Url::fromRoute('site_analyzer.dashboard'),
+      '#attributes' => [
+        'title' => t('Site Analyzer Dashboard'),
+        'class' => ['toolbar-icon', 'toolbar-icon-site-analyzer'],
+      ],
+    ],
+    'tray' => [
+      '#heading' => t('Site Analyzer'),
+      'site_analyzer_menu' => [
+        '#theme' => 'links',
+        '#links' => $navigation_items,
+        '#attributes' => [
+          'class' => ['toolbar-menu'],
+        ],
+      ],
+    ],
+    '#weight' => 200,
+    '#attached' => [
+      'library' => ['site_analyzer/toolbar'],
+    ],
+  ];
+  
+  return $items;
+}
+
+/**
+ * Implements hook_admin_toolbar_tools_alter().
+ */
+function site_analyzer_admin_toolbar_tools_alter(array &$items) {
+  // Add Site Analyzer to admin toolbar if the module is available
+  if (\Drupal::moduleHandler()->moduleExists('admin_toolbar_tools')) {
+    $items['site_analyzer'] = [
+      'title' => t('Site Analyzer'),
+      'url' => \Drupal\Core\Url::fromRoute('site_analyzer.dashboard'),
+      'parent' => 'admin_toolbar_tools.extra_links',
+      'weight' => -10,
+    ];
+    
+    // Get navigation items
+    $navigation_config = _site_analyzer_get_navigation_config();
+    
+    foreach ($navigation_config as $key => $item) {
+      $items['site_analyzer.' . $key] = [
+        'title' => $item['title'],
+        'url' => \Drupal\Core\Url::fromRoute($item['route']),
+        'parent' => 'site_analyzer',
+        'weight' => $item['weight'],
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function site_analyzer_requirements($phase) {
+  $requirements = [];
+  
+  if ($phase == 'runtime') {
+    $config = \Drupal::config('site_analyzer.settings');
+    
+    // Check if the module is properly configured
+    if (!$config->get('configured')) {
+      $requirements['site_analyzer_config'] = [
+        'title' => t('Site Analyzer'),
+        'value' => t('Not configured'),
+        'description' => t('Site Analyzer needs to be configured. <a href="@url">Configure now</a>.', [
+          '@url' => \Drupal\Core\Url::fromRoute('site_analyzer.settings')->toString(),
+        ]),
+        'severity' => REQUIREMENT_WARNING,
+      ];
+    }
+    else {
+      $requirements['site_analyzer_config'] = [
+        'title' => t('Site Analyzer'),
+        'value' => t('Configured'),
+        'severity' => REQUIREMENT_OK,
+      ];
+    }
+  }
+  
+  return $requirements;
+}
+
+/**
+ * Get navigation configuration for Site Analyzer.
+ */
+function _site_analyzer_get_navigation_config() {
+  return [
+    'dashboard' => [
+      'title' => t('Dashboard'),
+      'route' => 'site_analyzer.dashboard',
+      'icon' => '📊',
+      'description' => t('Overview and summary'),
+      'weight' => 0,
+    ],
+    'system' => [
+      'title' => t('System Analysis'),
+      'route' => 'site_analyzer.system_analysis',
+      'icon' => '⚙️',
+      'description' => t('System requirements and configuration'),
+      'weight' => 1,
+    ],
+    'modules' => [
+      'title' => t('Extensions Analysis'),
+      'route' => 'site_analyzer.module_analysis',
+      'icon' => '🧩',
+      'description' => t('Modules and themes analysis'),
+      'weight' => 2,
+    ],
+    'content' => [
+      'title' => t('Content Analysis'),
+      'route' => 'site_analyzer.content_analysis',
+      'icon' => '📝',
+      'description' => t('Content structure and fields'),
+      'weight' => 3,
+    ],
+    'database' => [
+      'title' => t('Database Analysis'),
+      'route' => 'site_analyzer.database_analysis',
+      'icon' => '🗄️',
+      'description' => t('Database performance and structure'),
+      'weight' => 4,
+    ],
+    'security' => [
+      'title' => t('Security Analysis'),
+      'route' => 'site_analyzer.security_analysis',
+      'icon' => '🔒',
+      'description' => t('Security assessment and audit'),
+      'weight' => 5,
+    ],
+    'performance' => [
+      'title' => t('Performance Analysis'),
+      'route' => 'site_analyzer.performance_analysis',
+      'icon' => '⚡',
+      'description' => t('Performance metrics and optimization'),
+      'weight' => 6,
+    ],
+    'upgrade' => [
+      'title' => t('Upgrade Readiness'),
+      'route' => 'site_analyzer.upgrade_report',
+      'icon' => '🚀',
+      'description' => t('Drupal upgrade readiness report'),
+      'weight' => 7,
+    ],
+    'watchdog' => [
+      'title' => t('Watchdog Analysis'),
+      'route' => 'site_analyzer.watchdog_analysis',
+      'icon' => '📋',
+      'description' => t('404 errors, PHP errors, and log analysis'),
+      'weight' => 8,
+    ],
+    'best_practices' => [
+      'title' => t('Best Practices'),
+      'route' => 'site_analyzer.best_practices_analysis',
+      'icon' => '✅',
+      'description' => t('Structural recommendations and best practices'),
+      'weight' => 9,
+    ],
+    'settings' => [
+      'title' => t('Settings'),
+      'route' => 'site_analyzer.settings',
+      'icon' => '⚙️',
+      'description' => t('Configure Site Analyzer'),
+      'weight' => 10,
+    ],
+  ];
+}
+
+/**
+ * Get navigation items for toolbar.
+ */
+function _site_analyzer_get_navigation_items() {
+  $navigation_config = _site_analyzer_get_navigation_config();
+  $links = [];
+  
+  foreach ($navigation_config as $key => $item) {
+    $links[$key] = [
+      'title' => $item['icon'] . ' ' . $item['title'],
+      'url' => \Drupal\Core\Url::fromRoute($item['route']),
+      'attributes' => [
+        'title' => $item['description'],
+      ],
+    ];
+  }
+  
+  return $links;
+}
+
+/**
+ * Get current page navigation context.
+ */
+function _site_analyzer_get_current_page_context() {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $navigation_config = _site_analyzer_get_navigation_config();
+  
+  foreach ($navigation_config as $key => $item) {
+    if ($item['route'] === $route_name) {
+      return [
+        'current_key' => $key,
+        'current_item' => $item,
+        'navigation' => $navigation_config,
+      ];
+    }
+  }
+  
+  return [
+    'current_key' => null,
+    'current_item' => null,
+    'navigation' => $navigation_config,
+  ];
+}
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function site_analyzer_page_attachments_alter(array &$attachments) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  
+  // Add navigation assets to all Site Analyzer pages
+  if (strpos($route_name, 'site_analyzer.') === 0) {
+    $attachments['#attached']['library'][] = 'site_analyzer/navigation';
+    
+    // Add navigation context to drupalSettings
+    $context = _site_analyzer_get_current_page_context();
+    $attachments['#attached']['drupalSettings']['siteAnalyzer']['navigation'] = $context;
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for page templates.
+ */
+function site_analyzer_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  
+  // Suggest site-analyzer page template for all Site Analyzer pages
+  if (strpos($route_name, 'site_analyzer.') === 0) {
+    $suggestions[] = 'page__site_analyzer';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for all Site Analyzer pages.
+ */
+function site_analyzer_preprocess_page(&$variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  
+  // Add navigation to all Site Analyzer pages
+  if (strpos($route_name, 'site_analyzer.') === 0) {
+    $navigation_data = _site_analyzer_get_navigation_data();
+    $variables['site_analyzer_navigation'] = $navigation_data;
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer dashboard template.
+ */
+function site_analyzer_preprocess_site_analyzer_dashboard(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer report template.
+ */
+function site_analyzer_preprocess_site_analyzer_report(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer unified extensions template.
+ */
+function site_analyzer_preprocess_site_analyzer_unified_extensions(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer unified extensions simple template.
+ */
+function site_analyzer_preprocess_site_analyzer_unified_extensions_simple(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer comprehensive extensions template.
+ */
+function site_analyzer_preprocess_site_analyzer_comprehensive_extensions(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer module report template.
+ */
+function site_analyzer_preprocess_site_analyzer_module_report(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer content report template.
+ */
+function site_analyzer_preprocess_site_analyzer_content_report(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer upgrade report template.
+ */
+function site_analyzer_preprocess_site_analyzer_upgrade_report(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer database report template.
+ */
+function site_analyzer_preprocess_site_analyzer_database_report(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer navigation template.
+ */
+function site_analyzer_preprocess_site_analyzer_navigation(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer security template.
+ */
+function site_analyzer_preprocess_site_analyzer_security(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer watchdog template.
+ */
+function site_analyzer_preprocess_site_analyzer_watchdog(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer best practices template.
+ */
+function site_analyzer_preprocess_site_analyzer_best_practices(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for Site Analyzer performance template.
+ */
+function site_analyzer_preprocess_site_analyzer_performance(&$variables) {
+  $navigation_data = _site_analyzer_get_navigation_data();
+  $variables['site_analyzer_navigation'] = $navigation_data;
+}
+
+/**
+ * Get navigation data for Site Analyzer pages.
+ */
+function _site_analyzer_get_navigation_data() {
+  $navigation_config = _site_analyzer_get_navigation_config();
+  $current_route = \Drupal::routeMatch()->getRouteName();
+  $current_page = null;
+  
+  // Find current page
+  foreach ($navigation_config as $key => $item) {
+    if ($item['route'] === $current_route) {
+      $current_page = $key;
+      break;
+    }
+  }
+  
+  // Build navigation items with URLs
+  $navigation_items = [];
+  foreach ($navigation_config as $key => $item) {
+    $navigation_items[$key] = [
+      'title' => $item['title'],
+      'url' => \Drupal\Core\Url::fromRoute($item['route'])->toString(),
+      'icon' => $item['icon'],
+      'description' => $item['description'],
+      'weight' => $item['weight'],
+    ];
+  }
+  
+  // Sort by weight
+  uasort($navigation_items, function($a, $b) {
+    return $a['weight'] <=> $b['weight'];
+  });
+  
+  return [
+    'navigation_items' => $navigation_items,
+    'current_page' => $current_page,
+  ];
+}
+

@@ -1,0 +1,105 @@
+dashboard:
+  version: 1.x
+  css:
+    theme:
+      css/analyzer.css: {}
+  js:
+    js/analyzer.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+
+reports:
+  css:
+    theme:
+      css/analyzer.css: {}
+      css/analyzer-simple.css: {}
+  js:
+    js/analyzer.js: {}
+    js/analyzer-simple.js: {}
+    js/module-analysis.js: {}
+    js/content-analysis.js: {}
+    js/unified-extensions.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+
+comprehensive-analysis:
+  css:
+    theme:
+      css/analyzer.css: {}
+  js:
+    js/analyzer.js: {}
+    js/comprehensive-extensions.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+
+database-analysis:
+  css:
+    theme:
+      css/analyzer.css: {}
+      css/database-analysis.css: {}
+  js:
+    js/analyzer.js: {}
+    js/database-analysis.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+
+upgrade-report:
+  version: 1.x
+  css:
+    theme:
+      css/analyzer.css: {}
+  js:
+    js/analyzer.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+
+navigation:
+  version: 1.x
+  css:
+    theme:
+      css/navigation.css: {}
+  js:
+    js/navigation.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+
+toolbar:
+  version: 1.x
+  css:
+    theme:
+      css/toolbar.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+performance-analysis:
+  css:
+    theme:
+      css/performance-analysis.css: {}
+  js:
+    js/performance-analysis.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+
+system-analysis:
+  css:
+    theme:
+      css/system-analysis.css: {}
+  js:
+    js/system-analysis.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery

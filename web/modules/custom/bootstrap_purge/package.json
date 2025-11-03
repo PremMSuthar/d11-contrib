@@ -1,0 +1,44 @@
+{
+  "name": "bootstrap-purge",
+  "version": "1.0.0",
+  "description": "Node.js dependencies for Bootstrap Purge Drupal module",
+  "main": "index.js",
+  "scripts": {
+    "purge:css": "purgecss",
+    "purge:run": "node scripts/purge-runner.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "drupal",
+    "bootstrap",
+    "css",
+    "purge",
+    "optimization",
+    "performance"
+  ],
+  "author": "Bootstrap Purge Contributors",
+  "license": "GPL-2.0-or-later",
+  "dependencies": {
+    "purgecss": "^5.0.0",
+    "postcss": "^8.4.0",
+    "postcss-cli": "^10.0.0",
+    "clean-css": "^5.3.0",
+    "terser": "^5.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/bootstrap-purge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/bootstrap-purge/issues"
+  },
+  "homepage": "https://github.com/your-org/bootstrap-purge#readme"
+}

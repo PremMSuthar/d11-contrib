@@ -1,0 +1,19 @@
+runtime_collector:
+  version: 1.x
+  js:
+    js/runtime-collector.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+
+admin_ui:
+  version: 1.x
+  css:
+    theme:
+      css/admin-ui.css: {}
+  js:
+    js/admin-ui.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupal.dialog

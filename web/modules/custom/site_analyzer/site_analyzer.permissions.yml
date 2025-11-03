@@ -1,0 +1,14 @@
+access site analyzer:
+  title: 'Access Site Analyzer'
+  description: 'View site analysis reports and dashboard'
+  restrict access: true
+
+export site analyzer reports:
+  title: 'Export Site Analyzer Reports'
+  description: 'Export analysis reports in various formats (PDF, CSV, JSON)'
+  restrict access: true
+
+administer site analyzer:
+  title: 'Administer Site Analyzer'
+  description: 'Configure Site Analyzer settings and advanced options'
+  restrict access: true

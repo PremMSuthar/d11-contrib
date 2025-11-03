@@ -1,0 +1,13 @@
+render_array_inspector:
+  version: 1.x
+  js:
+    js/render-array-inspector.js: {}
+  css:
+    theme:
+      css/render-array-inspector.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - toolbar/toolbar

@@ -1,0 +1,10 @@
+name: Bootstrap Purge
+type: module
+description: 'Automatically detects and removes unused CSS and JS on a per-page or global basis to reduce payload size and speed up rendering.'
+core_version_requirement: ^10 || ^11
+package: Performance
+dependencies:
+  - drupal:system
+  - drupal:file
+  - drupal:user
+configure: bootstrap_purge.settings

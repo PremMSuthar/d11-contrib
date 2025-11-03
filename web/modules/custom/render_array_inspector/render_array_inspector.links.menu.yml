@@ -1,0 +1,6 @@
+render_array_inspector.settings:
+  title: 'Render Array Inspector'
+  description: 'Configure the Render Array Inspector module settings.'
+  parent: system.admin_config_development
+  route_name: render_array_inspector.settings
+  weight: 10

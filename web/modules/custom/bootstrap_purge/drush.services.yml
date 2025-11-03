@@ -1,0 +1,6 @@
+services:
+  bootstrap_purge.commands:
+    class: \Drupal\bootstrap_purge\Commands\BootstrapPurgeCommands
+    arguments: ['@bootstrap_purge.asset_manager', '@bootstrap_purge.asset_collector', '@bootstrap_purge.analyzer']
+    tags:
+      - { name: drush.command }

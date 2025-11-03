@@ -1,0 +1,86 @@
+# Main Site Analyzer menu item in Reports
+site_analyzer.dashboard:
+  title: 'Site Analyzer'
+  description: 'Comprehensive site analysis and upgrade planning tools'
+  route_name: site_analyzer.dashboard
+  parent: system.admin_reports
+  weight: -10
+
+# Analysis submenu items
+site_analyzer.system_analysis:
+  title: 'System Analysis'
+  description: 'Analyze system requirements, PHP, database, and server configuration'
+  route_name: site_analyzer.system_analysis
+  parent: site_analyzer.dashboard
+  weight: 1
+
+site_analyzer.module_analysis:
+  title: 'Module Analysis'
+  description: 'Analyze modules, compatibility, updates, and Drupal 11 readiness'
+  route_name: site_analyzer.module_analysis
+  parent: site_analyzer.dashboard
+  weight: 2
+
+site_analyzer.theme_analysis:
+  title: 'Theme Analysis'
+  description: 'Analyze themes, template overrides, and compatibility'
+  route_name: site_analyzer.theme_analysis
+  parent: site_analyzer.dashboard
+  weight: 3
+
+site_analyzer.content_analysis:
+  title: 'Content Analysis'
+  description: 'Analyze content types, fields, media, and taxonomy structure'
+  route_name: site_analyzer.content_analysis
+  parent: site_analyzer.dashboard
+  weight: 4
+
+site_analyzer.database_analysis:
+  title: 'Database Analysis'
+  description: 'Analyze database structure, performance, and migration requirements'
+  route_name: site_analyzer.database_analysis
+  parent: site_analyzer.dashboard
+  weight: 5
+
+site_analyzer.security_analysis:
+  title: 'Security Analysis'
+  description: 'Security assessment, permissions audit, and vulnerability scan'
+  route_name: site_analyzer.security_analysis
+  parent: site_analyzer.dashboard
+  weight: 6
+
+site_analyzer.performance_analysis:
+  title: 'Performance Analysis'
+  description: 'Performance metrics, cache analysis, and optimization recommendations'
+  route_name: site_analyzer.performance_analysis
+  parent: site_analyzer.dashboard
+  weight: 7
+
+site_analyzer.upgrade_report:
+  title: 'Upgrade Readiness'
+  description: 'Comprehensive Drupal upgrade planning and readiness report'
+  route_name: site_analyzer.upgrade_report
+  parent: site_analyzer.dashboard
+  weight: 8
+
+site_analyzer.watchdog_analysis:
+  title: 'Watchdog Analysis'
+  description: 'Analyze 404 errors, PHP errors, and log monitoring'
+  route_name: site_analyzer.watchdog_analysis
+  parent: site_analyzer.dashboard
+  weight: 9
+
+site_analyzer.best_practices_analysis:
+  title: 'Best Practices'
+  description: 'Drupal best practices and structural recommendations'
+  route_name: site_analyzer.best_practices_analysis
+  parent: site_analyzer.dashboard
+  weight: 10
+
+# Configuration menu item in Development
+site_analyzer.settings:
+  title: 'Site Analyzer'
+  description: 'Configure Site Analyzer settings and automation'
+  route_name: site_analyzer.settings
+  parent: system.admin_config_development
+  weight: 10

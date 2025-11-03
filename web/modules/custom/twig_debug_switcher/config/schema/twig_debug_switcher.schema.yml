@@ -1,0 +1,7 @@
+twig_debug_switcher.settings:
+  type: config_object
+  label: 'Twig Debug Switcher settings'
+  mapping:
+    debug_enabled:
+      type: boolean
+      label: 'Debug enabled'

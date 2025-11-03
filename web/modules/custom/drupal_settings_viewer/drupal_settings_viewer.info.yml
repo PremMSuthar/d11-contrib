@@ -1,0 +1,9 @@
+name: Drupal Settings Viewer
+type: module
+description: 'Provides a toolbar item for developers to view the drupalSettings object for the current page.'
+package: Development
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:toolbar
+  - drupal:user
+configure: drupal_settings_viewer.settings

@@ -1,0 +1,119 @@
+<?php
+
+/**
+ * @file
+ * Contains render_array_inspector.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Render\Element;
+
+/**
+ * Implements hook_help().
+ */
+function render_array_inspector_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.render_array_inspector':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Render Array Inspector module provides a toolbar panel that displays the render array structure behind the current page output. This is useful for developers to understand how Drupal builds pages and debug rendering issues.') . '</p>';
+      $output .= '<h3>' . t('Usage') . '</h3>';
+      $output .= '<p>' . t('Once enabled, the module adds a "Render Array" tab to the toolbar. Click on it to view the render array structure of the current page in a collapsible tree format.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_toolbar().
+ */
+function render_array_inspector_toolbar() {
+  $items = [];
+
+  // Only show for users with permission.
+  if (!\Drupal::currentUser()->hasPermission('access render array inspector')) {
+    return $items;
+  }
+
+  $items['render_array_inspector'] = [
+    '#type' => 'toolbar_item',
+    '#weight' => 999,
+    'tab' => [
+      '#type' => 'link',
+      '#title' => t('Debug'),
+      '#url' => \Drupal\Core\Url::fromRoute('<front>'),
+      '#attributes' => [
+        'title' => t('Render Array Inspector'),
+        'class' => ['toolbar-icon', 'toolbar-icon-render-array'],
+      ],
+    ],
+    'tray' => [
+      '#heading' => t('Render Array Inspector'),
+      'content' => [
+        '#markup' => render_array_inspector_get_content(),
+        '#attached' => [
+          'library' => [
+            'render_array_inspector/render_array_inspector',
+          ],
+        ],
+      ],
+    ],
+  ];
+
+  return $items;
+}
+
+/**
+ * Get the content for the toolbar tray.
+ */
+function render_array_inspector_get_content() {
+  $html = '<div class="render-array-inspector">';
+  $html .= '<div class="inspector-header">';
+  $html .= '<h3>Debug Panel</h3>';
+  $html .= '<div class="inspector-controls">';
+  $html .= '<button id="refresh-data" class="btn btn-refresh">Load</button>';
+  $html .= '<button id="expand-all" class="btn btn-expand">+</button>';
+  $html .= '<button id="collapse-all" class="btn btn-collapse">-</button>';
+  $html .= '</div>';
+  $html .= '</div>';
+  $html .= '<div class="inspector-content">';
+  $html .= '<div id="loading-message" class="loading" style="display: none;">Loading...</div>';
+  $html .= '<div id="empty-message" class="empty-state"><p>Click "Load" to view render array</p></div>';
+  $html .= '<div id="data-display" class="data-container" style="display: none;"></div>';
+  $html .= '</div>';
+  $html .= '</div>';
+  
+  return $html;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function render_array_inspector_theme() {
+  return [
+    'render_array_inspector_tray' => [
+      'variables' => [],
+      'template' => 'render-array-inspector-tray',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function render_array_inspector_page_attachments(array &$attachments) {
+  // Only attach for users with permission.
+  if (!\Drupal::currentUser()->hasPermission('access render array inspector')) {
+    return;
+  }
+
+  // Attach the library to every page.
+  $attachments['#attached']['library'][] = 'render_array_inspector/render_array_inspector';
+  
+  // Pass settings to JavaScript.
+  $config = \Drupal::config('render_array_inspector.settings');
+  $attachments['#attached']['drupalSettings']['renderArrayInspector'] = [
+    'autoExpand' => $config->get('auto_expand') ?: FALSE,
+    'maxDepth' => $config->get('max_depth') ?: 10,
+    'showCacheInfo' => $config->get('show_cache_info') ?: FALSE,
+  ];
+}

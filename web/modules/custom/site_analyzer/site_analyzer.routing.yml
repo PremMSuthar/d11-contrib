@@ -1,0 +1,121 @@
+site_analyzer.dashboard:
+  path: '/admin/reports/site-analyzer'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::dashboard'
+    _title: 'Site Analyzer Dashboard'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.system_analysis:
+  path: '/admin/reports/site-analyzer/system'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::systemAnalysis'
+    _title: 'System Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.module_analysis:
+  path: '/admin/reports/site-analyzer/modules'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::moduleAnalysis'
+    _title: 'Module Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.theme_analysis:
+  path: '/admin/reports/site-analyzer/themes'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::themeAnalysis'
+    _title: 'Theme Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.content_analysis:
+  path: '/admin/reports/site-analyzer/content'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::contentAnalysis'
+    _title: 'Content Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.database_analysis:
+  path: '/admin/reports/site-analyzer/database'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::databaseAnalysis'
+    _title: 'Database Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.security_analysis:
+  path: '/admin/reports/site-analyzer/security'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::security'
+    _title: 'Security Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.watchdog_analysis:
+  path: '/admin/reports/site-analyzer/watchdog'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::watchdog'
+    _title: 'Watchdog Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.best_practices_analysis:
+  path: '/admin/reports/site-analyzer/best-practices'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::bestPractices'
+    _title: 'Best Practices Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.performance_analysis:
+  path: '/admin/reports/site-analyzer/performance'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::performanceAnalysis'
+    _title: 'Performance Analysis'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.upgrade_report:
+  path: '/admin/reports/site-analyzer/upgrade'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::upgradeReport'
+    _title: 'Upgrade Readiness Report'
+  requirements:
+    _permission: 'access site analyzer'
+
+site_analyzer.export:
+  path: '/admin/reports/site-analyzer/export/{format}'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::exportReport'
+    format: 'json'
+  requirements:
+    _permission: 'export site analyzer reports'
+    format: 'json|pdf|csv'
+
+site_analyzer.settings:
+  path: '/admin/config/development/site-analyzer'
+  defaults:
+    _form: '\Drupal\site_analyzer\Form\AnalyzerConfigForm'
+    _title: 'Site Analyzer Settings'
+  requirements:
+    _permission: 'administer site analyzer'
+
+site_analyzer.scan_module:
+  path: '/admin/reports/site-analyzer/scan/{module_name}'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::scanModule'
+    module_name: ''
+  requirements:
+    _permission: 'access site analyzer'
+    _method: 'POST'
+
+site_analyzer.scan_all_modules:
+  path: '/admin/reports/site-analyzer/scan-all'
+  defaults:
+    _controller: '\Drupal\site_analyzer\Controller\AnalyzerController::scanAllModules'
+  requirements:
+    _permission: 'access site analyzer'
+    _method: 'POST'

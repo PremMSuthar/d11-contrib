@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Template for the Drupal Settings Viewer toolbar tray.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the containing element.
+ */
+#}
+<div{{ attributes.addClass('drupal-settings-viewer-tray') }}>
+  <div class="toolbar-tray-inner">
+    <div class="settings-viewer-header">
+      <h3>{{ 'Current Page Settings'|t }}</h3>
+      <p class="settings-description">{{ 'drupalSettings object for this page'|t }}</p>
+    </div>
+    
+    <div class="settings-viewer-controls">
+      <button type="button" class="button button--small" id="refresh-settings">
+        {{ 'Refresh'|t }}
+      </button>
+      <button type="button" class="button button--small" id="copy-settings">
+        {{ 'Copy All'|t }}
+      </button>
+      <button type="button" class="button button--small" id="toggle-expand">
+        {{ 'Expand All'|t }}
+      </button>
+    </div>
+    
+    <div id="drupal-settings-tray-container" class="settings-tray-container">
+      <div class="loading-message">
+        <p>{{ 'Loading drupalSettings...'|t }}</p>
+      </div>
+    </div>
+  </div>
+</div>

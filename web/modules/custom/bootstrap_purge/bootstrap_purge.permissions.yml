@@ -1,0 +1,8 @@
+administer bootstrap purge:
+  title: 'Administer Bootstrap Purge'
+  description: 'Configure Bootstrap Purge settings, manage asset purging, and view analytics.'
+  restrict access: true
+
+view bootstrap purge reports:
+  title: 'View Bootstrap Purge Reports'
+  description: 'View Bootstrap Purge analytics and reports without administrative access.'

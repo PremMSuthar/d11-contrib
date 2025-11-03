@@ -1,0 +1,831 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer comprehensive content analysis report.
+ *
+ * Available variables:
+ * - content_data: Complete content analysis data
+ * - relationship_diagram: Content relationship diagram data
+ * - migration_recommendations: Migration-specific recommendations
+ */
+#}
+
+<div class="site-analyzer-content-report">
+  <div class="report-header">
+    <h1>{{ 'Comprehensive Content Analysis Report'|t }}</h1>
+    <div class="report-summary">
+      <div class="summary-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ content_data.content_types is defined ? content_data.content_types|length : 0 }}</span>
+          <span class="stat-label">{{ 'Content Types'|t }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ content_data.content_volume.node.count ?? 0 }}</span>
+          <span class="stat-label">{{ 'Total Nodes'|t }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ content_data.media_usage.total_files ?? 0 }}</span>
+          <span class="stat-label">{{ 'Media Files'|t }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ content_data.taxonomy_structure is defined ? content_data.taxonomy_structure|length : 0 }}</span>
+          <span class="stat-label">{{ 'Vocabularies'|t }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  <div class="report-actions">
+    <div class="export-group">
+      <label>{{ 'Export Options:'|t }}</label>
+      <button class="btn btn-primary export-content-report" data-format="json">
+        📄 {{ 'JSON'|t }}
+      </button>
+      <button class="btn btn-secondary export-content-report" data-format="csv">
+        📊 {{ 'CSV'|t }}
+      </button>
+      <button class="btn btn-success export-content-report" data-format="excel">
+        📈 {{ 'Excel'|t }}
+      </button>
+    </div>
+  </div>
+
+  <div class="content-tabs">
+    <div class="tab-nav">
+      <button class="tab-button active" data-tab="overview">📊 {{ 'Overview'|t }}</button>
+      <button class="tab-button" data-tab="content-types">📝 {{ 'Content Types'|t }}</button>
+      <button class="tab-button" data-tab="media">🖼️ {{ 'Media & Files'|t }}</button>
+      <button class="tab-button" data-tab="taxonomy">🏷️ {{ 'Taxonomy'|t }}</button>
+      <button class="tab-button" data-tab="relationships">🔗 {{ 'Relationships'|t }}</button>
+      <button class="tab-button" data-tab="migration">🚀 {{ 'Migration Guide'|t }}</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div class="tab-content active" id="overview">
+      <div class="overview-grid">
+        <div class="overview-card">
+          <h3>{{ 'Content Volume'|t }}</h3>
+          <div class="volume-chart">
+            {% if content_data.content_volume is defined %}
+              {% for entity_type, data in content_data.content_volume %}
+                <div class="volume-item">
+                  <span class="volume-label">{{ data.label ?? entity_type }}</span>
+                  <span class="volume-count">{{ (data.count ?? 0)|number_format }}</span>
+                  <div class="volume-bar">
+                    {% set max_count = content_data.content_volume.node.count > 0 ? content_data.content_volume.node.count : 1 %}
+                    <div class="volume-fill" style="width: {{ ((data.count ?? 0) / max_count * 100)|round }}%"></div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="volume-item">
+                <span class="volume-label">{{ 'No content data available'|t }}</span>
+                <span class="volume-count">0</span>
+                <div class="volume-bar">
+                  <div class="volume-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <h3>{{ 'Storage Usage'|t }}</h3>
+          <div class="storage-info">
+            <div class="storage-item">
+              <span class="storage-label">{{ 'Total Media Size'|t }}</span>
+              <span class="storage-size">{{ ((content_data.media_usage.total_size ?? 0) / 1024 / 1024)|number_format(2) }} MB</span>
+            </div>
+            {% if content_data.media_usage.storage_locations is defined %}
+              {% for scheme, data in content_data.media_usage.storage_locations %}
+                <div class="storage-item">
+                  <span class="storage-label">{{ scheme|upper }}://</span>
+                  <span class="storage-size">{{ (data.count ?? 0)|number_format }} files ({{ ((data.size ?? 0) / 1024 / 1024)|number_format(2) }} MB)</span>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <h3>{{ 'Field Types Usage'|t }}</h3>
+          <div class="field-types-chart">
+            {% if content_data.field_usage_stats.most_used_field_types is defined %}
+              {% for field_type, data in content_data.field_usage_stats.most_used_field_types|slice(0, 8) %}
+                <div class="field-type-item">
+                  <span class="field-type-name">{{ field_type|title }}</span>
+                  <div>
+                    <span class="field-type-count">{{ data.count|number_format }}</span>
+                    {% if data.is_deprecated %}
+                      <span class="deprecated-badge">⚠️ Deprecated</span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="field-type-item">
+                <span class="field-type-name">{{ 'No field usage data available'|t }}</span>
+                <div>
+                  <span class="field-type-count">0</span>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <h3>{{ 'Content Health'|t }}</h3>
+          <div class="health-indicators">
+            <div class="health-item">
+              <span class="health-label">{{ 'Deprecated Fields'|t }}</span>
+              {% set deprecated_count = content_data.deprecated_fields is defined ? content_data.deprecated_fields|length : 0 %}
+              <span class="health-value {{ deprecated_count > 0 ? 'warning' : 'good' }}">
+                {{ deprecated_count }}
+              </span>
+            </div>
+            <div class="health-item">
+              <span class="health-label">{{ 'Recent Content'|t }}</span>
+              <span class="health-value good">{{ (content_data.content_volume.node.recent_count ?? 0)|number_format }}</span>
+            </div>
+            <div class="health-item">
+              <span class="health-label">{{ 'Media Types'|t }}</span>
+              <span class="health-value good">{{ content_data.media_usage.media_types is defined ? content_data.media_usage.media_types|length : 0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Types Tab -->
+    <div class="tab-content" id="content-types">
+      <div class="content-types-analysis">
+        {% if content_data.content_types is defined and content_data.content_types|length > 0 %}
+          {% for type_id, type_data in content_data.content_types %}
+            <div class="content-type-card">
+            <div class="content-type-header">
+              <h3>{{ type_data.label }} <span class="type-id">({{ type_id }})</span></h3>
+              <div class="type-stats">
+                <a href="/admin/content?type={{ type_id }}" class="stat-link stat-nodes" title="{{ 'View all %type content'|t({'%type': type_data.label}) }}">
+                  <span class="stat-number">{{ type_data.content_count|number_format }}</span>
+                  <span class="stat-label">{{ 'nodes'|t }}</span>
+                </a>
+                <a href="/admin/structure/types/manage/{{ type_id }}/fields" class="stat-link stat-fields" title="{{ 'Manage %type fields'|t({'%type': type_data.label}) }}">
+                  <span class="stat-number">{{ type_data.field_count|number_format }}</span>
+                  <span class="stat-label">{{ 'fields'|t }}</span>
+                </a>
+              </div>
+            </div>
+            
+            <div class="content-type-details">
+              {% if type_data.description %}
+                <p class="type-description">{{ type_data.description }}</p>
+              {% endif %}
+              
+              <div class="type-info-grid">
+                <div class="info-section">
+                  <h4>{{ 'Publishing Status'|t }}</h4>
+                  <div class="status-info">
+                    <div class="status-item">
+                      <span class="status-label">{{ 'Published'|t }}</span>
+                      <span class="status-count">{{ (type_data.workflow_states.published ?? 0)|number_format }}</span>
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">{{ 'Unpublished'|t }}</span>
+                      <span class="status-count">{{ (type_data.workflow_states.unpublished ?? 0)|number_format }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="info-section">
+                  <h4>{{ 'Display Modes'|t }}</h4>
+                  <div class="modes-list">
+                    {% for mode in type_data.display_modes %}
+                      <span class="mode-badge">{{ mode }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <div class="info-section">
+                  <h4>{{ 'Form Modes'|t }}</h4>
+                  <div class="modes-list">
+                    {% for mode in type_data.form_modes %}
+                      <span class="mode-badge">{{ mode }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="fields-section">
+                <h4>{{ 'Custom Fields'|t }}</h4>
+                <div class="fields-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{{ 'Field'|t }}</th>
+                        <th>{{ 'Type'|t }}</th>
+                        <th>{{ 'Required'|t }}</th>
+                        <th>{{ 'Cardinality'|t }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for field_name, field_data in type_data.fields %}
+                        <tr>
+                          <td>
+                            <strong>{{ field_data.label }}</strong>
+                            <br><small>{{ field_name }}</small>
+                          </td>
+                          <td>{{ field_data.type }}</td>
+                          <td>{{ field_data.required ? '✅' : '❌' }}</td>
+                          <td>{{ field_data.cardinality == -1 ? 'Unlimited' : field_data.cardinality }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="no-content-types">
+            <div class="empty-state">
+              <div class="empty-icon">📝</div>
+              <div class="empty-message">{{ 'No content types found'|t }}</div>
+              <p>{{ 'Content type analysis will appear here once content is detected.'|t }}</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Media & Files Tab -->
+    <div class="tab-content" id="media">
+      <div class="media-analysis">
+        <div class="media-overview">
+            <div class="media-stats-grid">
+            <div class="media-stat-card">
+              <h3>{{ 'File Statistics'|t }}</h3>
+              <div class="stat-list">
+                <div class="stat-item">
+                  <span class="stat-label">{{ 'Total Files'|t }}</span>
+                  <a href="/admin/content/files" class="stat-value-link">
+                    <span class="stat-value">{{ content_data.media_usage.total_files|number_format }}</span>
+                  </a>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">{{ 'Total Size'|t }}</span>
+                  <span class="stat-value">{{ (content_data.media_usage.total_size / 1024 / 1024)|number_format(2) }} MB</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">{{ 'Average File Size'|t }}</span>
+                  <span class="stat-value">
+                    {{ content_data.media_usage.total_files > 0 ? ((content_data.media_usage.total_size / content_data.media_usage.total_files / 1024)|number_format(2)) : 0 }} KB
+                  </span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">{{ 'Largest Files'|t }}</span>
+                  <span class="stat-value">
+                    {% set largest_size = 0 %}
+                    {% for mime_type, data in content_data.media_usage.file_types %}
+                      {% if data.size > largest_size %}
+                        {% set largest_size = data.size %}
+                      {% endif %}
+                    {% endfor %}
+                    {{ (largest_size / 1024 / 1024)|number_format(2) }} MB
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="media-stat-card">
+              <h3>{{ 'File Types'|t }}</h3>
+              <div class="file-types-list">
+                {% for mime_type, data in content_data.media_usage.file_types %}
+                  <div class="file-type-item">
+                    <span class="mime-type">{{ mime_type }}</span>
+                    <div>
+                      <span class="file-count">{{ data.count|number_format }} files</span>
+                      <span class="file-size">({{ (data.size / 1024 / 1024)|number_format(2) }} MB)</span>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="media-stat-card">
+              <h3>{{ 'Storage Locations'|t }}</h3>
+              <div class="storage-locations-list">
+                {% for scheme, data in content_data.media_usage.storage_locations %}
+                  <div class="storage-location-item">
+                    <span class="scheme-name">{{ scheme|upper }}://</span>
+                    <span class="location-count">{{ data.count }} files</span>
+                    <span class="location-size">{{ (data.size / 1024 / 1024)|number_format(2) }} MB</span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="media-stat-card">
+              <h3>{{ 'Media Types'|t }}</h3>
+              <div class="media-types-list">
+                {% for type_id, type_data in content_data.media_usage.media_types %}
+                  <div class="media-type-item">
+                    <div class="media-type-header">
+                      <span class="media-type-name">{{ type_data.label }}</span>
+                      <a href="/admin/content/media?type={{ type_id }}" class="media-count-link">
+                        <span class="media-type-count">{{ type_data.count|number_format }} items</span>
+                      </a>
+                    </div>
+                    <div class="media-type-details">
+                      <span class="media-type-source">{{ 'Source: %source'|t({'%source': type_data.source}) }}</span>
+                      {% if type_data.extensions is defined %}
+                        <span class="media-type-extensions">{{ 'Extensions: %ext'|t({'%ext': type_data.extensions|join(', ')}) }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taxonomy Tab -->
+    <div class="tab-content" id="taxonomy">
+      <div class="taxonomy-analysis">
+        {% for vocab_id, vocab_data in content_data.taxonomy_structure %}
+          <div class="vocabulary-card">
+            <div class="vocabulary-header">
+              <h3>{{ vocab_data.label }} <span class="vocab-id">({{ vocab_id }})</span></h3>
+              <div class="vocab-stats">
+                <span class="stat">{{ vocab_data.term_count|number_format }} terms</span>
+                <span class="stat">{{ vocab_data.hierarchy_depth|number_format }} levels deep</span>
+              </div>
+            </div>
+            
+            <div class="vocabulary-details">
+              {% if vocab_data.description %}
+                <p class="vocab-description">{{ vocab_data.description }}</p>
+              {% endif %}
+              
+              {% if vocab_data.fields %}
+                <div class="vocab-fields">
+                  <h4>{{ 'Custom Fields'|t }}</h4>
+                  <div class="fields-list">
+                    {% for field_name, field_data in vocab_data.fields %}
+                      <div class="field-item">
+                        <span class="field-name">{{ field_data.label }}</span>
+                        <span class="field-type">{{ field_data.type }}</span>
+                        {% if field_data.required %}
+                          <span class="required-badge">Required</span>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Relationships Tab -->
+    <div class="tab-content" id="relationships">
+      <div class="relationships-analysis">
+        <h3>{{ 'Content Relationship Diagram'|t }}</h3>
+        
+        {% if content_data.content_types is defined and content_data.content_types|length > 0 %}
+          <div class="relationship-diagram">
+            <div class="diagram-container">
+              <div id="mermaid-diagram-container"></div>
+              <div class="diagram-loading" id="diagram-loading">
+                <div class="loading-spinner"></div>
+                <p>{{ 'Generating relationship diagram...'|t }}</p>
+              </div>
+            </div>
+            
+            <div class="diagram-fallback" id="diagram-fallback" style="display: none;">
+              <div class="fallback-content">
+                <h4>{{ 'Visual Diagram Not Available'|t }}</h4>
+                <p>{{ 'The relationship diagram could not be rendered. Please see the relationship summary below.'|t }}</p>
+                <button class="btn btn-secondary" id="retry-diagram">{{ 'Try Again'|t }}</button>
+              </div>
+            </div>
+            
+            <!-- Debug information (hidden by default) -->
+            <div class="diagram-debug" id="diagram-debug" style="display: none;">
+              <h5>{{ 'Debug Information'|t }}</h5>
+              <pre id="debug-content"></pre>
+              <button class="btn btn-sm btn-secondary" onclick="document.getElementById('diagram-debug').style.display='none'">{{ 'Hide Debug'|t }}</button>
+            </div>
+          </div>
+          
+          <!-- Pass data to JavaScript -->
+          <script type="application/json" id="content-analysis-data">
+            {
+              "content_types": {{ content_data.content_types is defined ? content_data.content_types|json_encode|raw : '{}' }},
+              "taxonomy_structure": {{ content_data.taxonomy_structure is defined ? content_data.taxonomy_structure|json_encode|raw : '{}' }},
+              "media_types": {{ content_data.media_usage.media_types is defined ? content_data.media_usage.media_types|json_encode|raw : '{}' }},
+              "debug_info": {
+                "has_content_types": {{ content_data.content_types is defined ? 'true' : 'false' }},
+                "content_types_count": {{ content_data.content_types is defined ? content_data.content_types|length : 0 }},
+                "raw_data_keys": {{ content_data|keys|json_encode|raw }}
+              }
+            }
+          </script>
+        {% else %}
+          <div class="no-relationships">
+            <div class="empty-state">
+              <div class="empty-icon">🔗</div>
+              <div class="empty-message">{{ 'No content relationships found'|t }}</div>
+              <p>{{ 'Content types and their relationships will appear here once content analysis is complete.'|t }}</p>
+            </div>
+          </div>
+        {% endif %}
+        
+        <div class="relationship-details">
+          <h4>{{ 'Relationship Summary'|t }}</h4>
+          {% if content_data.content_types is defined and content_data.content_types|length > 0 %}
+            <div class="relationship-list">
+              {% set has_relationships = false %}
+              {% for type_id, type_data in content_data.content_types %}
+                {% if type_data.fields is defined %}
+                  {% for field_name, field_data in type_data.fields %}
+                    {% if field_data.type in ['entity_reference', 'image', 'file', 'media'] %}
+                      {% set has_relationships = true %}
+                      <div class="relationship-item">
+                        <span class="source">{{ type_data.label ?? type_id }}</span>
+                        <span class="relationship-type">{{ field_data.type }}</span>
+                        <span class="target">{{ field_data.label ?? field_name }}</span>
+                        <span class="cardinality">
+                          {{ field_data.cardinality == -1 ? 'Multiple' : (field_data.cardinality == 1 ? 'Single' : field_data.cardinality) }}
+                        </span>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endfor %}
+              
+              {% if not has_relationships %}
+                <div class="no-relationships-found">
+                  <p>{{ 'No entity reference, image, file, or media fields found in the analyzed content types.'|t }}</p>
+                </div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="no-data">
+              <p>{{ 'No content type data available for relationship analysis.'|t }}</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Migration Guide Tab -->
+    <div class="tab-content" id="migration">
+      <div class="migration-guide">
+        <h3>{{ 'Migration & Upgrade Guide'|t }}</h3>
+        
+        <div class="migration-sections">
+          <div class="migration-section">
+            <h4>{{ 'Content Migration Checklist'|t }}</h4>
+            <div class="checklist">
+              <div class="checklist-item">
+                <input type="checkbox" id="backup-content">
+                <label for="backup-content">{{ 'Backup all content and media files'|t }}</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="audit-fields">
+                <label for="audit-fields">{{ 'Audit custom fields for compatibility'|t }}</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="test-media">
+                <label for="test-media">{{ 'Test media file accessibility'|t }}</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="review-taxonomy">
+                <label for="review-taxonomy">{{ 'Review taxonomy structure'|t }}</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="validate-relationships">
+                <label for="validate-relationships">{{ 'Validate entity relationships'|t }}</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="test-migrations">
+                <label for="test-migrations">{{ 'Test migration scripts on staging environment'|t }}</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="performance-baseline">
+                <label for="performance-baseline">{{ 'Establish performance baseline metrics'|t }}</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="migration-section">
+            <h4>{{ 'Potential Issues'|t }}</h4>
+            <div class="issues-list">
+              {% if content_data.deprecated_fields|length > 0 %}
+                <div class="issue-item warning">
+                  <span class="issue-icon">⚠️</span>
+                  <span class="issue-text">{{ 'Deprecated field types detected'|t }}: {{ content_data.deprecated_fields|length }}</span>
+                </div>
+              {% endif %}
+              
+              {% set large_files = 0 %}
+              {% for mime_type, data in content_data.media_usage.file_types %}
+                {% if data.size > (100 * 1024 * 1024) %}
+                  {% set large_files = large_files + 1 %}
+                {% endif %}
+              {% endfor %}
+              
+              {% if large_files > 0 %}
+                <div class="issue-item info">
+                  <span class="issue-icon">ℹ️</span>
+                  <span class="issue-text">{{ 'Large file types detected - plan for extended migration time'|t }}</span>
+                </div>
+              {% endif %}
+              
+              {% if content_data.content_volume.node.count > 1000 %}
+                <div class="issue-item info">
+                  <span class="issue-icon">ℹ️</span>
+                  <span class="issue-text">{{ 'Large content volume (%count nodes) - consider batch migration'|t({'%count': content_data.content_volume.node.count|number_format}) }}</span>
+                </div>
+              {% endif %}
+              
+              {% if content_data.media_usage.total_files > 5000 %}
+                <div class="issue-item info">
+                  <span class="issue-icon">ℹ️</span>
+                  <span class="issue-text">{{ 'Large number of media files (%count) - plan for extended file migration time'|t({'%count': content_data.media_usage.total_files|number_format}) }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="migration-section">
+            <h4>{{ 'Migration Recommendations'|t }}</h4>
+            <div class="recommendations-list">
+              <div class="recommendation-item">
+                <h5>{{ 'Content Types'|t }}</h5>
+                <p>{{ 'Review all custom fields and ensure they are compatible with the target Drupal version.'|t }}</p>
+              </div>
+              <div class="recommendation-item">
+                <h5>{{ 'Media Files'|t }}</h5>
+                <p>{{ 'Verify file system permissions and storage locations before migration.'|t }}</p>
+              </div>
+              <div class="recommendation-item">
+                <h5>{{ 'Taxonomy'|t }}</h5>
+                <p>{{ 'Export taxonomy hierarchies and validate term relationships post-migration.'|t }}</p>
+              </div>
+              <div class="recommendation-item">
+                <h5>{{ 'Performance'|t }}</h5>
+                <p>{{ 'Consider content archiving for sites with large volumes to improve migration performance.'|t }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if content_data.content_types is defined and content_data.content_types|length > 0 %}
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let diagramRendered = false;
+      
+      // Initialize Mermaid
+      function initializeMermaid() {
+        if (typeof mermaid !== 'undefined') {
+          try {
+            mermaid.initialize({ 
+              startOnLoad: false,
+              theme: 'default',
+              flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+              },
+              themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#2c3e50',
+                primaryBorderColor: '#667eea',
+                lineColor: '#6c757d'
+              }
+            });
+            return true;
+          } catch (error) {
+            console.error('Mermaid initialization failed:', error);
+            return false;
+          }
+        }
+        return false;
+      }
+      
+      // Generate Mermaid diagram syntax from data
+      function generateDiagramSyntax(data) {
+        console.log('Generating diagram with data:', data);
+        
+        // Start with a simple test diagram
+        let syntax = 'graph TD\n';
+        let nodeCount = 0;
+        
+        try {
+          // Add content types
+          if (data.content_types && typeof data.content_types === 'object') {
+            const contentTypes = Object.keys(data.content_types);
+            console.log('Found content types:', contentTypes);
+            
+            contentTypes.forEach(function(typeId, index) {
+              const typeData = data.content_types[typeId];
+              const nodeId = 'CT' + index;
+              const label = (typeData.label || typeId).replace(/["']/g, '').substring(0, 20);
+              const count = typeData.content_count || 0;
+              
+              syntax += '    ' + nodeId + '["' + label + '<br/>' + count + ' nodes"]\n';
+              nodeCount++;
+              
+              // Add simple relationships for entity references
+              if (typeData.fields && typeof typeData.fields === 'object') {
+                const fields = Object.keys(typeData.fields);
+                let refCount = 0;
+                
+                fields.forEach(function(fieldName) {
+                  const fieldData = typeData.fields[fieldName];
+                  if (fieldData.type === 'entity_reference' && refCount < 2) { // Limit to 2 refs per type
+                    const fieldNodeId = 'REF' + index + '_' + refCount;
+                    const fieldLabel = (fieldData.label || fieldName).replace(/["']/g, '').substring(0, 15);
+                    
+                    syntax += '    ' + fieldNodeId + '["' + fieldLabel + '<br/>Reference"]\n';
+                    syntax += '    ' + nodeId + ' --> ' + fieldNodeId + '\n';
+                    nodeCount++;
+                    refCount++;
+                  }
+                });
+              }
+            });
+          }
+          
+          // Add taxonomy if available (simplified)
+          if (data.taxonomy_structure && typeof data.taxonomy_structure === 'object') {
+            const vocabs = Object.keys(data.taxonomy_structure);
+            vocabs.slice(0, 3).forEach(function(vocabId, index) { // Limit to 3 vocabs
+              const vocabData = data.taxonomy_structure[vocabId];
+              const nodeId = 'TAX' + index;
+              const label = (vocabData.label || vocabId).replace(/["']/g, '').substring(0, 15);
+              const count = vocabData.term_count || 0;
+              
+              syntax += '    ' + nodeId + '["' + label + '<br/>' + count + ' terms"]\n';
+              nodeCount++;
+            });
+          }
+          
+          // If no nodes, show a message instead of fake data
+          if (nodeCount === 0) {
+            syntax = 'graph TD\n    A["No Content Types Found"]\n    B["Please check content analysis"]\n    A --> B\n';
+          }
+          
+          console.log('Generated syntax:', syntax);
+          return syntax;
+        } catch (error) {
+          console.error('Error generating diagram syntax:', error);
+          return 'graph TD\n    ERROR["Error: ' + error.message + '"]\n';
+        }
+      }
+      
+      // Render the diagram
+      function renderDiagram() {
+        if (diagramRendered) return;
+        
+        const container = document.getElementById('mermaid-diagram-container');
+        const loading = document.getElementById('diagram-loading');
+        const fallback = document.getElementById('diagram-fallback');
+        const debug = document.getElementById('diagram-debug');
+        const debugContent = document.getElementById('debug-content');
+        
+        if (!container) return;
+        
+        try {
+          // Get data from script tag
+          const dataScript = document.getElementById('content-analysis-data');
+          if (!dataScript) {
+            throw new Error('No data available');
+          }
+          
+          const data = JSON.parse(dataScript.textContent);
+          console.log('Content analysis data:', data);
+          
+          // Validate data structure
+          if (!data || typeof data !== 'object') {
+            throw new Error('Invalid data structure');
+          }
+          
+          if (!data.content_types || typeof data.content_types !== 'object') {
+            console.warn('No content types found in data:', data);
+          }
+          
+          // Generate diagram syntax
+          const diagramSyntax = generateDiagramSyntax(data);
+          console.log('Generated Mermaid syntax:', diagramSyntax);
+          
+          // Show debug info
+          if (debugContent) {
+            debugContent.textContent = 'Data: ' + JSON.stringify(data, null, 2) + '\n\nMermaid Syntax:\n' + diagramSyntax;
+          }
+          
+          // Initialize Mermaid if not done
+          if (!initializeMermaid()) {
+            throw new Error('Mermaid initialization failed');
+          }
+          
+          // Hide loading
+          if (loading) loading.style.display = 'none';
+          
+          // Render diagram
+          mermaid.render('generated-diagram', diagramSyntax)
+            .then(function(result) {
+              container.innerHTML = result.svg;
+              container.style.display = 'block';
+              if (fallback) fallback.style.display = 'none';
+              diagramRendered = true;
+              console.log('Diagram rendered successfully');
+            })
+            .catch(function(error) {
+              console.error('Mermaid rendering failed:', error);
+              if (fallback) fallback.style.display = 'block';
+              if (debug) debug.style.display = 'block';
+              container.style.display = 'none';
+            });
+            
+        } catch (error) {
+          console.error('Diagram generation failed:', error);
+          if (loading) loading.style.display = 'none';
+          if (fallback) fallback.style.display = 'block';
+          if (debug) debug.style.display = 'block';
+          container.style.display = 'none';
+        }
+      }
+      
+      // Retry button functionality
+      document.addEventListener('click', function(e) {
+        if (e.target.id === 'retry-diagram') {
+          diagramRendered = false;
+          const loading = document.getElementById('diagram-loading');
+          const fallback = document.getElementById('diagram-fallback');
+          if (loading) loading.style.display = 'block';
+          if (fallback) fallback.style.display = 'none';
+          setTimeout(renderDiagram, 100);
+        }
+      });
+      
+      // Render when relationships tab is shown
+      function handleTabChange() {
+        const relationshipsTab = document.getElementById('relationships');
+        if (relationshipsTab && relationshipsTab.classList.contains('active')) {
+          setTimeout(renderDiagram, 200);
+        }
+      }
+      
+      // Listen for tab changes
+      document.addEventListener('click', function(e) {
+        if (e.target.matches('[data-tab="relationships"]')) {
+          setTimeout(handleTabChange, 100);
+        }
+      });
+      
+      // Initial render if relationships tab is active
+          // Initial render if relationships tab is active
+          setTimeout(handleTabChange, 500);
+          
+          // Also try to render immediately for testing
+          setTimeout(function() {
+            const testSyntax = 'graph TD\n    A["Test Node 1"]\n    B["Test Node 2"]\n    A --> B\n';
+            console.log('Testing with simple diagram:', testSyntax);
+            
+            if (typeof mermaid !== 'undefined') {
+              try {
+                mermaid.render('test-diagram', testSyntax)
+                  .then(function(result) {
+                    console.log('Test diagram rendered successfully');
+                  })
+                  .catch(function(error) {
+                    console.error('Test diagram failed:', error);
+                  });
+              } catch (error) {
+                console.error('Test diagram error:', error);
+              }
+            }
+          }, 1000);
+    });
+  </script>
+{% endif %}

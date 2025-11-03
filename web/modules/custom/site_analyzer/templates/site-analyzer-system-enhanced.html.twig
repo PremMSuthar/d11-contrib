@@ -1,0 +1,1339 @@
+{#
+/**
+ * @file
+ * Template for Enhanced Site Analyzer System Analysis.
+ *
+ * Available variables:
+ * - system_data: Enhanced system analysis data
+ * - recommendations: Array of system recommendations
+ */
+#}
+
+<div class="site-analyzer-system-enhanced">
+  <div class="unified-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">🖥️</span>
+        {{ 'Enhanced System Analysis'|t }}
+      </h1>
+      <p class="page-description">
+        {{ 'Comprehensive system analysis with Drupal version tracking, developer tools detection, and environment assessment'|t }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary refresh-btn" onclick="refreshSystemAnalysis()">
+        <span class="btn-icon">🔄</span>
+        {{ 'Refresh Analysis'|t }}
+      </button>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {% if system_data %}
+    <div class="system-analysis-content">
+      
+      {# System Health Overview #}
+      {% if system_data.system_health %}
+        <div class="analysis-section system-health-overview">
+          <h2>{{ 'System Health Overview'|t }}</h2>
+          
+          <div class="health-score-card">
+            <div class="score-circle score-{{ system_data.system_health.overall_score >= 80 ? 'excellent' : (system_data.system_health.overall_score >= 60 ? 'good' : (system_data.system_health.overall_score >= 40 ? 'fair' : 'poor')) }}">
+              <span class="score-number">{{ system_data.system_health.overall_score }}</span>
+              <span class="score-label">{{ 'Health Score'|t }}</span>
+            </div>
+            
+            <div class="health-indicators">
+              {% if system_data.system_health.critical_issues %}
+                <div class="indicator critical">
+                  <span class="indicator-count">{{ system_data.system_health.critical_issues|length }}</span>
+                  <span class="indicator-label">{{ 'Critical Issues'|t }}</span>
+                </div>
+              {% endif %}
+              
+              {% if system_data.system_health.warnings %}
+                <div class="indicator warning">
+                  <span class="indicator-count">{{ system_data.system_health.warnings|length }}</span>
+                  <span class="indicator-label">{{ 'Warnings'|t }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# Enhanced Drupal Information #}
+      {% if system_data.drupal_enhanced %}
+        <div class="analysis-section drupal-enhanced">
+          <h2>{{ 'Drupal Information'|t }}</h2>
+          
+          <div class="drupal-version-card">
+            <div class="version-header">
+              <div class="version-info">
+                <h3>{{ 'Drupal'|t }} {{ system_data.drupal_enhanced.current_version }}</h3>
+                <div class="version-status status-{{ system_data.drupal_enhanced.version_status }}">
+                  {% set status_labels = {
+                    'latest_stable': 'Latest Stable',
+                    'stable': 'Stable',
+                    'outdated': 'Outdated',
+                    'development': 'Development',
+                    'pre_release': 'Pre-release',
+                    'end_of_life': 'End of Life'
+                  } %}
+                  {{ status_labels[system_data.drupal_enhanced.version_status] ?? system_data.drupal_enhanced.version_status|title }}
+                </div>
+              </div>
+              
+              <div class="version-badges">
+                {% if system_data.drupal_enhanced.is_stable %}
+                  <span class="badge badge-success">{{ 'Stable'|t }}</span>
+                {% endif %}
+                {% if system_data.drupal_enhanced.security_coverage %}
+                  <span class="badge badge-success">{{ 'Security Support'|t }}</span>
+                {% else %}
+                  <span class="badge badge-danger">{{ 'No Security Support'|t }}</span>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="version-details">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <div class="detail-label">{{ 'Release Date'|t }}</div>
+                  <div class="detail-value">{{ system_data.drupal_enhanced.release_date|date('F j, Y') }}</div>
+                  <div class="detail-meta">{{ system_data.drupal_enhanced.days_since_release }} {{ 'days ago'|t }}</div>
+                </div>
+                
+                <div class="detail-item">
+                  <div class="detail-label">{{ 'Latest Stable'|t }}</div>
+                  <div class="detail-value">{{ system_data.drupal_enhanced.latest_stable }}</div>
+                  {% if system_data.drupal_enhanced.current_version != system_data.drupal_enhanced.latest_stable %}
+                    <div class="detail-meta update-available">{{ 'Update Available'|t }}</div>
+                  {% endif %}
+                </div>
+                
+                {% if system_data.drupal_enhanced.days_until_eol > 0 %}
+                  <div class="detail-item">
+                    <div class="detail-label">{{ 'End of Life'|t }}</div>
+                    <div class="detail-value">{{ system_data.drupal_enhanced.eol_date|date('F j, Y') }}</div>
+                    <div class="detail-meta">{{ system_data.drupal_enhanced.days_until_eol }} {{ 'days remaining'|t }}</div>
+                  </div>
+                {% endif %}
+                
+                <div class="detail-item">
+                  <div class="detail-label">{{ 'Upgrade Path'|t }}</div>
+                  <div class="detail-value">{{ system_data.drupal_enhanced.upgrade_path }}</div>
+                </div>
+              </div>
+            </div>
+            
+            {# Drupal Version Recommendations #}
+            {% if system_data.drupal_enhanced.recommendations %}
+              <div class="version-recommendations">
+                <h4>{{ 'Version Recommendations'|t }}</h4>
+                {% for recommendation in system_data.drupal_enhanced.recommendations %}
+                  <div class="recommendation recommendation-{{ recommendation.type }} priority-{{ recommendation.priority }}">
+                    <div class="recommendation-header">
+                      <span class="recommendation-title">{{ recommendation.title }}</span>
+                      <span class="recommendation-priority">{{ recommendation.priority|title }}</span>
+                    </div>
+                    <div class="recommendation-message">{{ recommendation.message }}</div>
+                    {% if recommendation.action %}
+                      <div class="recommendation-action">{{ 'Action:'|t }} {{ recommendation.action }}</div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {# Developer Tools Section #}
+      {% if system_data.developer_tools %}
+        <div class="analysis-section developer-tools">
+          <h2>{{ 'Developer Tools'|t }}</h2>
+          
+          {# Drush Information #}
+          {% if system_data.developer_tools.drush %}
+            <div class="tool-section">
+              <h3>
+                <span class="tool-icon">🔧</span>
+                {{ 'Drush'|t }}
+                {% if system_data.developer_tools.drush.available %}
+                  <span class="status-badge status-success">{{ 'Available'|t }}</span>
+                {% else %}
+                  <span class="status-badge status-warning">{{ 'Not Available'|t }}</span>
+                {% endif %}
+              </h3>
+              
+              {% if system_data.developer_tools.drush.available %}
+                <div class="tool-details">
+                  <div class="tool-info">
+                    <div class="info-item">
+                      <span class="info-label">{{ 'Version:'|t }}</span>
+                      <span class="info-value">{{ system_data.developer_tools.drush.version ?? 'Unknown' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'Path:'|t }}</span>
+                      <span class="info-value"><code>{{ system_data.developer_tools.drush.path }}</code></span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'Installation:'|t }}</span>
+                      <span class="info-value">{{ system_data.developer_tools.drush.local_install ? 'Local (Composer)' : 'Global' }}</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              
+              {% if system_data.developer_tools.drush.recommendations %}
+                <div class="tool-recommendations">
+                  {% for recommendation in system_data.developer_tools.drush.recommendations %}
+                    <div class="recommendation recommendation-{{ recommendation.type }}">
+                      <div class="recommendation-message">{{ recommendation.message }}</div>
+                      {% if recommendation.action %}
+                        <div class="recommendation-action">{{ recommendation.action }}</div>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {# Composer Information #}
+          {% if system_data.developer_tools.composer %}
+            <div class="tool-section">
+              <h3>
+                <span class="tool-icon">📦</span>
+                {{ 'Composer'|t }}
+                {% if system_data.developer_tools.composer.available %}
+                  <span class="status-badge status-success">{{ 'Available'|t }}</span>
+                {% else %}
+                  <span class="status-badge status-warning">{{ 'Not Available'|t }}</span>
+                {% endif %}
+              </h3>
+              
+              <div class="composer-status">
+                <div class="status-grid">
+                  <div class="status-item">
+                    <div class="status-label">{{ 'composer.json'|t }}</div>
+                    <div class="status-value status-{{ system_data.developer_tools.composer.composer_json_exists ? 'good' : 'bad' }}">
+                      {{ system_data.developer_tools.composer.composer_json_exists ? 'Exists' : 'Missing' }}
+                    </div>
+                  </div>
+                  <div class="status-item">
+                    <div class="status-label">{{ 'composer.lock'|t }}</div>
+                    <div class="status-value status-{{ system_data.developer_tools.composer.composer_lock_exists ? 'good' : 'bad' }}">
+                      {{ system_data.developer_tools.composer.composer_lock_exists ? 'Exists' : 'Missing' }}
+                    </div>
+                  </div>
+                  <div class="status-item">
+                    <div class="status-label">{{ 'vendor/'|t }}</div>
+                    <div class="status-value status-{{ system_data.developer_tools.composer.vendor_dir_exists ? 'good' : 'bad' }}">
+                      {{ system_data.developer_tools.composer.vendor_dir_exists ? 'Exists' : 'Missing' }}
+                    </div>
+                  </div>
+                  {% if system_data.developer_tools.composer.version %}
+                    <div class="status-item">
+                      <div class="status-label">{{ 'Version'|t }}</div>
+                      <div class="status-value">{{ system_data.developer_tools.composer.version }}</div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          {# Code Quality Tools #}
+          {% if system_data.developer_tools.code_quality %}
+            <div class="tool-section">
+              <h3>
+                <span class="tool-icon">🔍</span>
+                {{ 'Code Quality Tools'|t }}
+                <span class="tools-summary">
+                  {{ system_data.developer_tools.code_quality.summary.available_tools }}/{{ system_data.developer_tools.code_quality.summary.total_tools }} {{ 'available'|t }}
+                </span>
+              </h3>
+              
+              <div class="tools-grid">
+                {% for tool_name, tool in system_data.developer_tools.code_quality.tools %}
+                  <div class="tool-card tool-{{ tool.available ? 'available' : 'missing' }}">
+                    <div class="tool-header">
+                      <div class="tool-name">{{ tool_name|upper }}</div>
+                      <div class="tool-status">
+                        {% if tool.available %}
+                          <span class="status-badge status-success">✓</span>
+                          {% if tool.version %}
+                            <span class="tool-version">v{{ tool.version }}</span>
+                          {% endif %}
+                        {% else %}
+                          <span class="status-badge status-missing">✗</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="tool-description">{{ tool.description }}</div>
+                    {% if tool.available and tool.path %}
+                      <div class="tool-path"><code>{{ tool.path }}</code></div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+              
+              {% if system_data.developer_tools.code_quality.summary.recommended_missing %}
+                <div class="missing-tools-notice">
+                  <h4>{{ 'Recommended Missing Tools'|t }}</h4>
+                  <p>{{ 'Consider installing these essential code quality tools:'|t }}</p>
+                  <ul>
+                    {% for tool in system_data.developer_tools.code_quality.summary.recommended_missing %}
+                      <li><strong>{{ tool|upper }}</strong> - {{ 'Install with:'|t }} <code>composer require --dev {{ tool }}</code></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {# Testing Tools #}
+          {% if system_data.developer_tools.testing_tools %}
+            <div class="tool-section">
+              <h3>
+                <span class="tool-icon">🧪</span>
+                {{ 'Testing Tools'|t }}
+              </h3>
+              
+              <div class="tools-grid">
+                {% for tool_name, tool in system_data.developer_tools.testing_tools %}
+                  <div class="tool-card tool-{{ tool.available ? 'available' : 'missing' }}">
+                    <div class="tool-header">
+                      <div class="tool-name">{{ tool.name|title }}</div>
+                      <div class="tool-status">
+                        {% if tool.available %}
+                          <span class="status-badge status-success">✓</span>
+                          {% if tool.version %}
+                            <span class="tool-version">v{{ tool.version }}</span>
+                          {% endif %}
+                        {% else %}
+                          <span class="status-badge status-missing">✗</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="tool-description">{{ tool.description }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {# Development Modules #}
+          {% if system_data.developer_tools.development_modules %}
+            <div class="tool-section">
+              <h3>
+                <span class="tool-icon">🔧</span>
+                {{ 'Development Modules'|t }}
+                <span class="modules-count">{{ system_data.developer_tools.development_modules.count }} {{ 'installed'|t }}</span>
+              </h3>
+              
+              {% if system_data.developer_tools.development_modules.installed_modules %}
+                <div class="dev-modules-list">
+                  {% for module_name, module in system_data.developer_tools.development_modules.installed_modules %}
+                    <div class="dev-module-item">
+                      <div class="module-name">{{ module_name }}</div>
+                      <div class="module-description">{{ module.description }}</div>
+                      <span class="status-badge status-success">{{ 'Enabled'|t }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="no-dev-modules">
+                  <p>{{ 'No development modules are currently installed.'|t }}</p>
+                  <p>{{ 'Consider installing:'|t }}</p>
+                  <ul>
+                    {% for module_name, description in system_data.developer_tools.development_modules.available_modules %}
+                      <li><strong>{{ module_name }}</strong> - {{ description }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {# Build Tools #}
+          {% if system_data.developer_tools.build_tools %}
+            <div class="tool-section">
+              <h3>
+                <span class="tool-icon">⚙️</span>
+                {{ 'Build Tools'|t }}
+              </h3>
+              
+              <div class="build-tools-status">
+                <div class="tools-grid">
+                  {% for tool_name, tool in system_data.developer_tools.build_tools %}
+                    {% if tool_name not in ['package_json_exists', 'node_modules_exists'] %}
+                      <div class="tool-card tool-{{ tool.available ? 'available' : 'missing' }}">
+                        <div class="tool-header">
+                          <div class="tool-name">{{ tool.name|title }}</div>
+                          <div class="tool-status">
+                            {% if tool.available %}
+                              <span class="status-badge status-success">✓</span>
+                              {% if tool.version %}
+                                <span class="tool-version">v{{ tool.version }}</span>
+                              {% endif %}
+                            {% else %}
+                              <span class="status-badge status-missing">✗</span>
+                            {% endif %}
+                          </div>
+                        </div>
+                        <div class="tool-description">{{ tool.description }}</div>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                
+                <div class="build-files-status">
+                  <h4>{{ 'Build Configuration'|t }}</h4>
+                  <div class="status-grid">
+                    <div class="status-item">
+                      <div class="status-label">{{ 'package.json'|t }}</div>
+                      <div class="status-value status-{{ system_data.developer_tools.build_tools.package_json_exists ? 'good' : 'neutral' }}">
+                        {{ system_data.developer_tools.build_tools.package_json_exists ? 'Exists' : 'Not Found' }}
+                      </div>
+                    </div>
+                    <div class="status-item">
+                      <div class="status-label">{{ 'node_modules/'|t }}</div>
+                      <div class="status-value status-{{ system_data.developer_tools.build_tools.node_modules_exists ? 'good' : 'neutral' }}">
+                        {{ system_data.developer_tools.build_tools.node_modules_exists ? 'Exists' : 'Not Found' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Environment Analysis #}
+      {% if system_data.environment_analysis %}
+        <div class="analysis-section environment-analysis">
+          <h2>{{ 'Environment Analysis'|t }}</h2>
+          
+          <div class="environment-overview">
+            <div class="env-type-card">
+              <h3>{{ 'Detected Environment'|t }}</h3>
+              <div class="env-type env-{{ system_data.environment_analysis.environment_type }}">
+                {{ system_data.environment_analysis.environment_type|title }}
+              </div>
+            </div>
+            
+            <div class="env-settings">
+              <div class="setting-item">
+                <div class="setting-label">{{ 'Debug Mode'|t }}</div>
+                <div class="setting-value status-{{ system_data.environment_analysis.debug_mode ? 'warning' : 'good' }}">
+                  {{ system_data.environment_analysis.debug_mode ? 'Enabled' : 'Disabled' }}
+                </div>
+              </div>
+              
+              <div class="setting-item">
+                <div class="setting-label">{{ 'Page Cache'|t }}</div>
+                <div class="setting-value status-{{ system_data.environment_analysis.caching_status.page_cache ? 'good' : 'warning' }}">
+                  {{ system_data.environment_analysis.caching_status.page_cache ? 'Enabled' : 'Disabled' }}
+                </div>
+              </div>
+              
+              <div class="setting-item">
+                <div class="setting-label">{{ 'CSS Aggregation'|t }}</div>
+                <div class="setting-value status-{{ system_data.environment_analysis.caching_status.css_aggregation ? 'good' : 'warning' }}">
+                  {{ system_data.environment_analysis.caching_status.css_aggregation ? 'Enabled' : 'Disabled' }}
+                </div>
+              </div>
+              
+              <div class="setting-item">
+                <div class="setting-label">{{ 'JS Aggregation'|t }}</div>
+                <div class="setting-value status-{{ system_data.environment_analysis.caching_status.js_aggregation ? 'good' : 'warning' }}">
+                  {{ system_data.environment_analysis.caching_status.js_aggregation ? 'Enabled' : 'Disabled' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# Performance Indicators #}
+      {% if system_data.performance_indicators %}
+        <div class="analysis-section performance-indicators">
+          <h2>{{ 'Performance Indicators'|t }}</h2>
+          
+          <div class="indicators-grid">
+            <div class="indicator-card">
+              <div class="indicator-title">{{ 'OPcache'|t }}</div>
+              <div class="indicator-value status-{{ system_data.performance_indicators.opcache_enabled ? 'good' : 'warning' }}">
+                {{ system_data.performance_indicators.opcache_enabled ? 'Enabled' : 'Disabled' }}
+              </div>
+            </div>
+            
+            <div class="indicator-card">
+              <div class="indicator-title">{{ 'Memory Usage'|t }}</div>
+              <div class="indicator-value status-{{ system_data.performance_indicators.memory_usage_percentage < 80 ? 'good' : 'warning' }}">
+                {{ system_data.performance_indicators.memory_usage_percentage }}%
+              </div>
+            </div>
+            
+            <div class="indicator-card">
+              <div class="indicator-title">{{ 'Cache Hit Rate'|t }}</div>
+              <div class="indicator-value status-{{ system_data.performance_indicators.cache_hit_rate >= 80 ? 'good' : 'warning' }}">
+                {{ system_data.performance_indicators.cache_hit_rate }}%
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# Security Assessment #}
+      {% if system_data.security_assessment %}
+        <div class="analysis-section security-assessment">
+          <h2>{{ 'Security Assessment'|t }}</h2>
+          
+          <div class="security-checks">
+            <div class="security-check">
+              <div class="check-label">{{ 'HTTPS Enabled'|t }}</div>
+              <div class="check-value status-{{ system_data.security_assessment.https_enabled ? 'good' : 'warning' }}">
+                {{ system_data.security_assessment.https_enabled ? 'Yes' : 'No' }}
+              </div>
+            </div>
+            
+            <div class="security-check">
+              <div class="check-label">{{ 'Admin User Blocked'|t }}</div>
+              <div class="check-value status-{{ system_data.security_assessment.admin_user_blocked ? 'good' : 'warning' }}">
+                {{ system_data.security_assessment.admin_user_blocked ? 'Yes' : 'No' }}
+              </div>
+            </div>
+            
+            <div class="security-check">
+              <div class="check-label">{{ 'Update Module'|t }}</div>
+              <div class="check-value status-{{ system_data.security_assessment.update_module_enabled ? 'good' : 'warning' }}">
+                {{ system_data.security_assessment.update_module_enabled ? 'Enabled' : 'Disabled' }}
+              </div>
+            </div>
+            
+            <div class="security-check">
+              <div class="check-label">{{ 'Settings File Writable'|t }}</div>
+              <div class="check-value status-{{ system_data.security_assessment.file_permissions.settings_writable ? 'warning' : 'good' }}">
+                {{ system_data.security_assessment.file_permissions.settings_writable ? 'Yes (Warning)' : 'No (Good)' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# System Recommendations #}
+      {% if recommendations %}
+        <div class="analysis-section system-recommendations">
+          <h2>{{ 'System Recommendations'|t }}</h2>
+          <div class="recommendations-list">
+            {% for recommendation in recommendations %}
+              <div class="recommendation recommendation-{{ recommendation.type }} priority-{{ recommendation.priority }}">
+                <div class="recommendation-header">
+                  <span class="recommendation-title">{{ recommendation.title ?? recommendation.message }}</span>
+                  <span class="recommendation-priority">{{ recommendation.priority|title }}</span>
+                </div>
+                <div class="recommendation-message">{{ recommendation.message }}</div>
+                {% if recommendation.action %}
+                  <div class="recommendation-action">{{ 'Action:'|t }} {{ recommendation.action }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      {{ 'System analysis data is not available. Please check the system analyzer service.'|t }}
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.site-analyzer-system-enhanced {
+  padding: 20px;
+}
+
+.unified-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px 0;
+  font-size: 2.2em;
+  font-weight: 600;
+  color: #333;
+}
+
+.title-icon {
+  margin-right: 12px;
+  font-size: 1.1em;
+}
+
+.page-description {
+  margin: 0;
+  font-size: 1.1em;
+  color: #666;
+  line-height: 1.4;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #0073aa;
+  color: white;
+  border-color: #0073aa;
+}
+
+.btn-primary:hover {
+  background-color: #005a87;
+  border-color: #005a87;
+}
+
+.btn-icon {
+  margin-right: 6px;
+  font-size: 0.9em;
+}
+
+.analysis-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+
+.analysis-section h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+/* System Health Overview */
+.health-score-card {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 6px solid;
+  position: relative;
+}
+
+.score-circle.score-excellent {
+  border-color: #0cce6b;
+  color: #0cce6b;
+}
+
+.score-circle.score-good {
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+.score-circle.score-fair {
+  border-color: #ffa400;
+  color: #ffa400;
+}
+
+.score-circle.score-poor {
+  border-color: #ff5722;
+  color: #ff5722;
+}
+
+.score-number {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.score-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+.health-indicators {
+  display: flex;
+  gap: 20px;
+}
+
+.indicator {
+  text-align: center;
+  padding: 15px;
+  border-radius: 8px;
+  background: white;
+  border-left: 4px solid;
+}
+
+.indicator.critical {
+  border-left-color: #ff5722;
+}
+
+.indicator.warning {
+  border-left-color: #ffa400;
+}
+
+.indicator-count {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.indicator-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Drupal Enhanced Section */
+.drupal-version-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.version-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.version-info h3 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.version-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.version-status.status-latest_stable {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.version-status.status-stable {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.version-status.status-outdated {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.version-status.status-development {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.version-status.status-end_of_life {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.version-badges {
+  display: flex;
+  gap: 10px;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.badge-danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #0073aa;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.detail-meta {
+  font-size: 12px;
+  color: #666;
+}
+
+.detail-meta.update-available {
+  color: #ef6c00;
+  font-weight: bold;
+}
+
+/* Developer Tools Section */
+.tool-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tool-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.tool-icon {
+  font-size: 1.2em;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-badge.status-success {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-badge.status-warning {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.status-badge.status-missing {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.tools-summary {
+  font-size: 14px;
+  color: #666;
+  margin-left: auto;
+}
+
+.tool-details {
+  margin-bottom: 15px;
+}
+
+.tool-info {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.info-item {
+  display: flex;
+  gap: 5px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.info-value {
+  color: #333;
+}
+
+.info-value code {
+  background: #f1f3f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+/* Tools Grid */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.tool-card {
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid;
+}
+
+.tool-card.tool-available {
+  background: #f8fff8;
+  border-left-color: #4caf50;
+}
+
+.tool-card.tool-missing {
+  background: #fff8f8;
+  border-left-color: #f44336;
+}
+
+.tool-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tool-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.tool-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tool-version {
+  font-size: 12px;
+  color: #666;
+}
+
+.tool-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.tool-path {
+  font-size: 12px;
+}
+
+.tool-path code {
+  background: #f1f3f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* Status Grids */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.status-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.status-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.status-value {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.status-value.status-good {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-value.status-bad {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-value.status-neutral {
+  background: #f5f5f5;
+  color: #666;
+}
+
+/* Environment Analysis */
+.environment-overview {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+}
+
+.env-type-card {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.env-type-card h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.env-type {
+  font-size: 24px;
+  font-weight: bold;
+  padding: 15px;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+.env-type.env-development {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.env-type.env-staging {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.env-type.env-production {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.env-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.setting-item {
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.setting-value {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.setting-value.status-good {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.setting-value.status-warning {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+/* Performance Indicators */
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.indicator-card {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.indicator-title {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.indicator-value {
+  font-size: 24px;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Security Assessment */
+.security-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.security-check {
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.check-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.check-value {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Recommendations */
+.recommendations-list {
+  display: grid;
+  gap: 15px;
+}
+
+.recommendation {
+  padding: 15px;
+  background: white;
+  border-radius: 5px;
+  border-left: 4px solid;
+}
+
+.recommendation-critical {
+  border-left-color: #ff5722;
+}
+
+.recommendation-warning {
+  border-left-color: #ffa400;
+}
+
+.recommendation-info {
+  border-left-color: #2196f3;
+}
+
+.recommendation-success {
+  border-left-color: #4caf50;
+}
+
+.recommendation-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.recommendation-title {
+  color: #333;
+}
+
+.recommendation-priority {
+  font-size: 12px;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.recommendation-message {
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.recommendation-action {
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+.recommendation-action code {
+  background: #f1f3f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-style: normal;
+}
+
+/* Missing Tools Notice */
+.missing-tools-notice {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fff3e0;
+  border-radius: 6px;
+  border-left: 4px solid #ef6c00;
+}
+
+.missing-tools-notice h4 {
+  margin: 0 0 10px 0;
+  color: #ef6c00;
+}
+
+.missing-tools-notice ul {
+  margin: 10px 0 0 20px;
+}
+
+.missing-tools-notice li {
+  margin-bottom: 5px;
+}
+
+.missing-tools-notice code {
+  background: #f1f3f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* Development Modules */
+.dev-modules-list {
+  display: grid;
+  gap: 10px;
+}
+
+.dev-module-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #4caf50;
+}
+
+.module-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.module-description {
+  font-size: 14px;
+  color: #666;
+  margin-left: 15px;
+  flex: 1;
+}
+
+.no-dev-modules {
+  padding: 20px;
+  background: white;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.no-dev-modules ul {
+  text-align: left;
+  margin: 15px 0 0 20px;
+}
+
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+</style>
+
+<script>
+function refreshSystemAnalysis() {
+  // Show loading state
+  const button = document.querySelector('.refresh-btn');
+  const originalText = button.innerHTML;
+  button.innerHTML = '<span class="btn-icon">⏳</span>' + Drupal.t('Refreshing...');
+  button.disabled = true;
+  
+  // Reload the current page
+  window.location.reload();
+}
+</script>

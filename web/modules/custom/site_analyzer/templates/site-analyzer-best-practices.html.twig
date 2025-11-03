@@ -1,0 +1,855 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer Best Practices Analysis page.
+ *
+ * Available variables:
+ * - best_practices_data: Array containing best practices analysis data
+ */
+#}
+
+<div class="site-analyzer-best-practices">
+  <div class="unified-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">✅</span>
+        {{ 'Best Practices Analysis'|t }}
+      </h1>
+      <p class="page-description">
+        {{ 'Drupal best practices and structural recommendations'|t }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary refresh-btn" onclick="refreshBestPracticesAnalysis()">
+        <span class="btn-icon">🔄</span>
+        {{ 'Refresh Analysis'|t }}
+      </button>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {% if best_practices_data %}
+    <div class="best-practices-content">
+      
+      {# Settings File Analysis #}
+      {% if best_practices_data.settings_file %}
+        <div class="analysis-section settings-file">
+          <h2>{{ 'Settings File Analysis'|t }}</h2>
+          
+          <div class="settings-overview">
+            <div class="status-indicator status-{{ best_practices_data.settings_file.status }}">
+              <strong>{{ 'Status:'|t }}</strong> {{ best_practices_data.settings_file.message }}
+            </div>
+            
+            <div class="settings-details">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <strong>{{ 'File Exists:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.settings_file.exists ? 'pass' : 'fail' }}">
+                    {{ best_practices_data.settings_file.exists ? 'Yes'|t : 'No'|t }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <strong>{{ 'Is Writable:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.settings_file.is_writable ? 'warn' : 'pass' }}">
+                    {{ best_practices_data.settings_file.is_writable ? 'Yes (Warning)'|t : 'No (Good)'|t }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <strong>{{ 'Is Symlink:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.settings_file.is_symlink ? 'warn' : 'pass' }}">
+                    {{ best_practices_data.settings_file.is_symlink ? 'Yes (Warning)'|t : 'No (Good)'|t }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <strong>{{ 'File Size:'|t }}</strong> {{ (best_practices_data.settings_file.size / 1024)|round(2) }} KB
+                </div>
+                <div class="detail-item">
+                  <strong>{{ 'Contains Database Config:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.settings_file.contains_database_config ? 'pass' : 'warn' }}">
+                    {{ best_practices_data.settings_file.contains_database_config ? 'Yes'|t : 'No'|t }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <strong>{{ 'Contains Hash Salt:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.settings_file.contains_hash_salt ? 'pass' : 'warn' }}">
+                    {{ best_practices_data.settings_file.contains_hash_salt ? 'Yes'|t : 'No'|t }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <strong>{{ 'Contains Trusted Hosts:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.settings_file.contains_trusted_hosts ? 'pass' : 'warn' }}">
+                    {{ best_practices_data.settings_file.contains_trusted_hosts ? 'Yes'|t : 'No'|t }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {% if best_practices_data.settings_file.recommendations %}
+              <div class="settings-recommendations">
+                <h3>{{ 'Recommendations'|t }}</h3>
+                <ul>
+                  {% for recommendation in best_practices_data.settings_file.recommendations %}
+                    <li>{{ recommendation }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {# Folder Structure Analysis #}
+      {% if best_practices_data.folder_structure %}
+        <div class="analysis-section folder-structure">
+          <h2>{{ 'Folder Structure Analysis'|t }}</h2>
+          
+          {% if best_practices_data.folder_structure.drupal_root_structure %}
+            <div class="root-structure">
+              <h3>{{ 'Drupal Root Structure'|t }}</h3>
+              <div class="structure-grid">
+                {% for dir, info in best_practices_data.folder_structure.drupal_root_structure %}
+                  <div class="structure-item">
+                    <div class="structure-name">
+                      <strong>{{ dir }}/</strong>
+                      <span class="status-{{ info.exists ? 'pass' : 'fail' }}">
+                        {{ info.exists ? '✓' : '✗' }}
+                      </span>
+                    </div>
+                    <div class="structure-description">{{ info.description }}</div>
+                    {% if info.exists %}
+                      <div class="structure-writable">
+                        {{ 'Writable:'|t }} 
+                        <span class="status-{{ info.writable ? 'pass' : 'info' }}">
+                          {{ info.writable ? 'Yes'|t : 'No'|t }}
+                        </span>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.folder_structure.sites_structure %}
+            <div class="sites-structure">
+              <h3>{{ 'Sites Directory Structure'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Site'|t }}</th>
+                    <th>{{ 'Has Settings'|t }}</th>
+                    <th>{{ 'Has Files Dir'|t }}</th>
+                    <th>{{ 'Files Writable'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for site, info in best_practices_data.folder_structure.sites_structure %}
+                    <tr>
+                      <td><strong>{{ site }}</strong></td>
+                      <td>
+                        <span class="status-{{ info.has_settings ? 'pass' : 'warn' }}">
+                          {{ info.has_settings ? 'Yes'|t : 'No'|t }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-{{ info.has_files_dir ? 'pass' : 'warn' }}">
+                          {{ info.has_files_dir ? 'Yes'|t : 'No'|t }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-{{ info.files_writable ? 'pass' : 'warn' }}">
+                          {{ info.files_writable ? 'Yes'|t : 'No'|t }}
+                        </span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.folder_structure.custom_directories %}
+            <div class="custom-directories">
+              <h3>{{ 'Custom Directories in Root'|t }}</h3>
+              <div class="alert alert-warning">
+                <strong>{{ 'Found custom items in Drupal root:'|t }}</strong>
+                <ul>
+                  {% for item in best_practices_data.folder_structure.custom_directories %}
+                    <li><code>{{ item }}</code></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.folder_structure.recommendations %}
+            <div class="folder-recommendations">
+              <h3>{{ 'Recommendations'|t }}</h3>
+              <ul>
+                {% for recommendation in best_practices_data.folder_structure.recommendations %}
+                  <li>{{ recommendation }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Multisite Setup Analysis #}
+      {% if best_practices_data.multisite_setup %}
+        <div class="analysis-section multisite-setup">
+          <h2>{{ 'Multisite Setup Analysis'|t }}</h2>
+          
+          <div class="multisite-overview">
+            <div class="multisite-stats">
+              <div class="stat-item">
+                <div class="stat-number">{{ best_practices_data.multisite_setup.sites_count }}</div>
+                <div class="stat-label">{{ 'Additional Sites'|t }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-status">
+                  <span class="status-{{ best_practices_data.multisite_setup.is_multisite ? 'info' : 'pass' }}">
+                    {{ best_practices_data.multisite_setup.is_multisite ? 'Multisite'|t : 'Single Site'|t }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {% if best_practices_data.multisite_setup.is_multisite %}
+              <div class="multisite-details">
+                <h3>{{ 'Sites List'|t }}</h3>
+                <ul>
+                  {% for site in best_practices_data.multisite_setup.sites_list %}
+                    <li><code>{{ site }}</code></li>
+                  {% endfor %}
+                </ul>
+
+                {% if best_practices_data.multisite_setup.shared_resources %}
+                  <h3>{{ 'Shared Resources'|t }}</h3>
+                  <div class="shared-resources">
+                    <div class="resource-item">
+                      <strong>{{ 'Shared Modules:'|t }}</strong> 
+                      <span class="status-{{ best_practices_data.multisite_setup.shared_resources.modules ? 'pass' : 'warn' }}">
+                        {{ best_practices_data.multisite_setup.shared_resources.modules ? 'Yes'|t : 'No'|t }}
+                      </span>
+                    </div>
+                    <div class="resource-item">
+                      <strong>{{ 'Shared Themes:'|t }}</strong> 
+                      <span class="status-{{ best_practices_data.multisite_setup.shared_resources.themes ? 'pass' : 'warn' }}">
+                        {{ best_practices_data.multisite_setup.shared_resources.themes ? 'Yes'|t : 'No'|t }}
+                      </span>
+                    </div>
+                    <div class="resource-item">
+                      <strong>{{ 'Shared Libraries:'|t }}</strong> 
+                      <span class="status-{{ best_practices_data.multisite_setup.shared_resources.libraries ? 'pass' : 'info' }}">
+                        {{ best_practices_data.multisite_setup.shared_resources.libraries ? 'Yes'|t : 'No'|t }}
+                      </span>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            {% if best_practices_data.multisite_setup.recommendations %}
+              <div class="multisite-recommendations">
+                <h3>{{ 'Recommendations'|t }}</h3>
+                <ul>
+                  {% for recommendation in best_practices_data.multisite_setup.recommendations %}
+                    <li>{{ recommendation }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {# Development Modules Analysis #}
+      {% if best_practices_data.development_modules %}
+        <div class="analysis-section development-modules">
+          <h2>{{ 'Development Modules Analysis'|t }}</h2>
+          
+          {% if best_practices_data.development_modules.development_modules_enabled %}
+            <div class="dev-modules-warning">
+              <div class="alert alert-warning">
+                <strong>{{ 'Warning:'|t }}</strong> {{ 'Development modules are enabled'|t }}
+              </div>
+              <h3>{{ 'Development Modules Enabled'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Module'|t }}</th>
+                    <th>{{ 'Description'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for module, description in best_practices_data.development_modules.development_modules_enabled %}
+                    <tr>
+                      <td><code>{{ module }}</code></td>
+                      <td>{{ description }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.development_modules.debug_modules_enabled %}
+            <div class="debug-modules">
+              <h3>{{ 'Debug/Logging Modules'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Module'|t }}</th>
+                    <th>{{ 'Description'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for module, description in best_practices_data.development_modules.debug_modules_enabled %}
+                    <tr>
+                      <td><code>{{ module }}</code></td>
+                      <td>{{ description }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.development_modules.recommendations %}
+            <div class="dev-modules-recommendations">
+              <h3>{{ 'Recommendations'|t }}</h3>
+              <ul>
+                {% for recommendation in best_practices_data.development_modules.recommendations %}
+                  <li>{{ recommendation }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# File Permissions Analysis #}
+      {% if best_practices_data.file_permissions %}
+        <div class="analysis-section file-permissions">
+          <h2>{{ 'File Permissions Analysis'|t }}</h2>
+          
+          {% if best_practices_data.file_permissions.settings_permissions %}
+            <div class="settings-permissions">
+              <h3>{{ 'Settings File Permissions'|t }}</h3>
+              <div class="permission-details">
+                <p><strong>{{ 'File:'|t }}</strong> <code>{{ best_practices_data.file_permissions.settings_permissions.file }}</code></p>
+                <p><strong>{{ 'Permissions:'|t }}</strong> <code>{{ best_practices_data.file_permissions.settings_permissions.permissions }}</code></p>
+                <p><strong>{{ 'Is Writable:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.file_permissions.settings_permissions.is_writable ? 'warn' : 'pass' }}">
+                    {{ best_practices_data.file_permissions.settings_permissions.is_writable ? 'Yes (Warning)'|t : 'No (Good)'|t }}
+                  </span>
+                </p>
+                <p><strong>{{ 'Is Secure:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.file_permissions.settings_permissions.is_secure ? 'pass' : 'fail' }}">
+                    {{ best_practices_data.file_permissions.settings_permissions.is_secure ? 'Yes'|t : 'No'|t }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.file_permissions.files_permissions %}
+            <div class="files-permissions">
+              <h3>{{ 'Files Directory Permissions'|t }}</h3>
+              <div class="permission-details">
+                <p><strong>{{ 'Directory:'|t }}</strong> <code>{{ best_practices_data.file_permissions.files_permissions.directory }}</code></p>
+                <p><strong>{{ 'Permissions:'|t }}</strong> <code>{{ best_practices_data.file_permissions.files_permissions.permissions }}</code></p>
+                <p><strong>{{ 'Is Writable:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.file_permissions.files_permissions.is_writable ? 'pass' : 'fail' }}">
+                    {{ best_practices_data.file_permissions.files_permissions.is_writable ? 'Yes'|t : 'No'|t }}
+                  </span>
+                </p>
+                <p><strong>{{ 'Has .htaccess:'|t }}</strong> 
+                  <span class="status-{{ best_practices_data.file_permissions.files_permissions.has_htaccess ? 'pass' : 'warn' }}">
+                    {{ best_practices_data.file_permissions.files_permissions.has_htaccess ? 'Yes'|t : 'No'|t }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.file_permissions.directory_permissions %}
+            <div class="directory-permissions">
+              <h3>{{ 'Directory Permissions'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Directory'|t }}</th>
+                    <th>{{ 'Description'|t }}</th>
+                    <th>{{ 'Permissions'|t }}</th>
+                    <th>{{ 'Writable'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for dir, info in best_practices_data.file_permissions.directory_permissions %}
+                    <tr>
+                      <td><code>{{ dir }}</code></td>
+                      <td>{{ info.description }}</td>
+                      <td><code>{{ info.permissions }}</code></td>
+                      <td>
+                        <span class="status-{{ info.is_writable ? 'pass' : 'info' }}">
+                          {{ info.is_writable ? 'Yes'|t : 'No'|t }}
+                        </span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+
+          {% if best_practices_data.file_permissions.recommendations %}
+            <div class="file-permissions-recommendations">
+              <h3>{{ 'Recommendations'|t }}</h3>
+              <ul>
+                {% for recommendation in best_practices_data.file_permissions.recommendations %}
+                  <li>{{ recommendation }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Overall Recommendations #}
+      {% if best_practices_data.recommendations %}
+        <div class="analysis-section overall-recommendations">
+          <h2>{{ 'Overall Recommendations'|t }}</h2>
+          <div class="recommendations-list">
+            {% for recommendation in best_practices_data.recommendations %}
+              <div class="recommendation recommendation-{{ recommendation.type }} priority-{{ recommendation.priority }}">
+                <div class="recommendation-header">
+                  <span class="recommendation-type">{{ recommendation.type|title }}</span>
+                  <span class="recommendation-priority">{{ recommendation.priority|title }}</span>
+                </div>
+                <div class="recommendation-message">{{ recommendation.message }}</div>
+                <div class="recommendation-category">{{ 'Category:'|t }} {{ recommendation.category }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      {{ 'Best practices analysis data is not available. Please check the best practices analyzer service.'|t }}
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.site-analyzer-best-practices {
+  padding: 20px;
+}
+
+.unified-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px 0;
+  font-size: 2.2em;
+  font-weight: 600;
+  color: #333;
+}
+
+.title-icon {
+  margin-right: 12px;
+  font-size: 1.1em;
+}
+
+.page-description {
+  margin: 0;
+  font-size: 1.1em;
+  color: #666;
+  line-height: 1.4;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #0073aa;
+  color: white;
+  border-color: #0073aa;
+}
+
+.btn-primary:hover {
+  background-color: #005a87;
+  border-color: #005a87;
+}
+
+.btn-secondary {
+  background-color: #f7f7f7;
+  color: #333;
+  border-color: #ccc;
+}
+
+.btn-secondary:hover {
+  background-color: #e7e7e7;
+  border-color: #bbb;
+}
+
+.btn-icon {
+  margin-right: 6px;
+  font-size: 0.9em;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  min-width: 180px;
+  z-index: 1000;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 8px 12px;
+  color: #333;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-arrow {
+  margin-left: 6px;
+  font-size: 0.8em;
+}
+
+.analysis-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+
+.analysis-section h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+.status-indicator {
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.status-pass {
+  background-color: #dff0d8;
+  color: #3c763d;
+  border: 1px solid #d6e9c6;
+}
+
+.status-warn {
+  background-color: #fcf8e3;
+  color: #8a6d3b;
+  border: 1px solid #faebcc;
+}
+
+.status-fail {
+  background-color: #f2dede;
+  color: #a94442;
+  border: 1px solid #ebccd1;
+}
+
+.status-info {
+  background-color: #d9edf7;
+  color: #31708f;
+  border: 1px solid #bce8f1;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.detail-item {
+  padding: 10px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.structure-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.structure-item {
+  padding: 15px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.structure-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.structure-description {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+
+.structure-writable {
+  font-size: 0.85em;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 20px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin: 10px;
+}
+
+.stat-number {
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-label {
+  margin-top: 5px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.stat-status {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.multisite-stats {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.shared-resources {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.resource-item {
+  padding: 10px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+}
+
+.table th,
+.table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.permission-details {
+  background: white;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-top: 15px;
+}
+
+.permission-details p {
+  margin-bottom: 10px;
+}
+
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.alert-success {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+}
+
+.alert-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+}
+
+.alert-error {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+
+.recommendations-list {
+  margin-top: 15px;
+}
+
+.recommendation {
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid #ddd;
+  background: white;
+  border-radius: 0 5px 5px 0;
+}
+
+.recommendation-error {
+  border-left-color: #d9534f;
+}
+
+.recommendation-warning {
+  border-left-color: #f0ad4e;
+}
+
+.recommendation-info {
+  border-left-color: #5bc0de;
+}
+
+.recommendation-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.recommendation-type {
+  text-transform: uppercase;
+  font-size: 0.85em;
+}
+
+.recommendation-priority {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.recommendation-category {
+  margin-top: 10px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+ul {
+  margin-top: 10px;
+}
+
+ul li {
+  margin-bottom: 5px;
+}
+</style>
+
+<script>
+function refreshBestPracticesAnalysis() {
+  // Show loading state
+  const button = document.querySelector('.refresh-btn');
+  const originalText = button.innerHTML;
+  button.innerHTML = '<span class="btn-icon">⏳</span>' + Drupal.t('Refreshing...');
+  button.disabled = true;
+  
+  // Reload the current page
+  window.location.reload();
+}
+</script>

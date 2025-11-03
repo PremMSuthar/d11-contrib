@@ -1,0 +1,83 @@
+{#
+/**
+ * @file
+ * Template for Bootstrap Purge dashboard.
+ *
+ * Available variables:
+ * - stats: Dashboard statistics
+ * - recent_purges: Recent purge operations
+ */
+#}
+
+<div class="bootstrap-purge-dashboard">
+  <div class="bootstrap-purge-stats">
+    <div class="bootstrap-purge-stat">
+      <span class="bootstrap-purge-stat-value">{{ stats.total_assets }}</span>
+      <span class="bootstrap-purge-stat-label">{{ 'Total Assets'|t }}</span>
+    </div>
+    
+    <div class="bootstrap-purge-stat">
+      <span class="bootstrap-purge-stat-value">{{ stats.bootstrap_assets }}</span>
+      <span class="bootstrap-purge-stat-label">{{ 'Bootstrap Assets'|t }}</span>
+    </div>
+    
+    <div class="bootstrap-purge-stat">
+      <span class="bootstrap-purge-stat-value">{{ stats.total_purged }}</span>
+      <span class="bootstrap-purge-stat-label">{{ 'Purged Assets'|t }}</span>
+    </div>
+    
+    <div class="bootstrap-purge-stat">
+      <span class="bootstrap-purge-stat-value">{{ stats.bytes_saved|format_size }}</span>
+      <span class="bootstrap-purge-stat-label">{{ 'Bytes Saved'|t }}</span>
+    </div>
+    
+    <div class="bootstrap-purge-stat">
+      <span class="bootstrap-purge-stat-value">{{ stats.percent_saved }}%</span>
+      <span class="bootstrap-purge-stat-label">{{ 'Percent Saved'|t }}</span>
+    </div>
+  </div>
+
+  {% if stats.last_analysis %}
+    <div class="bootstrap-purge-last-analysis">
+      <strong>{{ 'Last Analysis:'|t }}</strong> {{ stats.last_analysis|format_date('medium') }}
+    </div>
+  {% endif %}
+
+  {% if stats.last_purge %}
+    <div class="bootstrap-purge-last-purge">
+      <strong>{{ 'Last Purge:'|t }}</strong> {{ stats.last_purge|format_date('medium') }}
+    </div>
+  {% endif %}
+
+  {% if recent_purges %}
+    <div class="bootstrap-purge-recent">
+      <h3>{{ 'Recent Purges'|t }}</h3>
+      <table class="bootstrap-purge-assets-table">
+        <thead>
+          <tr>
+            <th>{{ 'Asset'|t }}</th>
+            <th>{{ 'Original Size'|t }}</th>
+            <th>{{ 'Purged Size'|t }}</th>
+            <th>{{ 'Savings'|t }}</th>
+            <th>{{ 'Date'|t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for asset_key, purge_info in recent_purges %}
+            <tr>
+              <td>{{ asset_key }}</td>
+              <td>{{ purge_info.original_size|format_size }}</td>
+              <td>{{ purge_info.size|format_size }}</td>
+              <td>
+                {% set savings = purge_info.original_size - purge_info.size %}
+                {% set savings_percent = purge_info.original_size > 0 ? ((savings / purge_info.original_size) * 100)|round(1) : 0 %}
+                {{ savings|format_size }} ({{ savings_percent }}%)
+              </td>
+              <td>{{ purge_info.created|format_date('short') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>

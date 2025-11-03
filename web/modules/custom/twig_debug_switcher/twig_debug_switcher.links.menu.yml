@@ -1,0 +1,6 @@
+twig_debug_switcher.settings:
+  title: 'Twig Debug Switcher'
+  description: 'Toggle Twig debug mode on/off from admin UI.'
+  parent: system.admin_config_development
+  route_name: twig_debug_switcher.settings
+  weight: 10

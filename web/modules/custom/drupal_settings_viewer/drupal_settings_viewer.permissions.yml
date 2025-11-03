@@ -1,0 +1,4 @@
+access drupal settings viewer:
+  title: 'Access Drupal Settings Viewer'
+  description: 'Allows users to view the drupalSettings object for debugging purposes.'
+  restrict access: true

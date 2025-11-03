@@ -1,0 +1,112 @@
+<?php
+
+/**
+ * @file
+ * Contains twig_debug_switcher.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function twig_debug_switcher_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the twig_debug_switcher module.
+    case 'help.page.twig_debug_switcher':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Twig Debug Switcher module allows developers to easily toggle Twig debug mode on and off from the admin interface. This is useful for development environments where you need to quickly enable or disable Twig debugging without manually editing configuration files.') . '</p>';
+      $output .= '<h3>' . t('Usage') . '</h3>';
+      $output .= '<p>' . t('Navigate to Administration » Configuration » Development » Twig Debug Switcher to toggle the debug mode.') . '</p>';
+      $output .= '<p><strong>' . t('Warning: This module should only be used in development environments. Do not use in production!') . '</strong></p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function twig_debug_switcher_requirements($phase) {
+  $requirements = [];
+
+  if ($phase == 'runtime') {
+    // Check if we're in a development environment
+    $config = \Drupal::config('system.performance');
+    $css_preprocess = $config->get('css.preprocess');
+    $js_preprocess = $config->get('js.preprocess');
+    
+    // If preprocessing is enabled, we're likely in production
+    if ($css_preprocess && $js_preprocess) {
+      $requirements['twig_debug_switcher_environment'] = [
+        'title' => t('Twig Debug Switcher Environment'),
+        'value' => t('Production environment detected'),
+        'description' => t('This module should only be used in development environments. Consider disabling it in production.'),
+        'severity' => REQUIREMENT_WARNING,
+      ];
+    }
+    else {
+      $requirements['twig_debug_switcher_environment'] = [
+        'title' => t('Twig Debug Switcher Environment'),
+        'value' => t('Development environment'),
+        'severity' => REQUIREMENT_OK,
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function twig_debug_switcher_page_attachments(array &$attachments) {
+  // Ensure Twig debug settings are applied on every page load
+  $config = \Drupal::config('twig_debug_switcher.settings');
+  $debug_enabled = (bool) $config->get('debug_enabled');
+  
+  if ($debug_enabled) {
+    // Apply debug settings to Twig environment
+    if (\Drupal::hasService('twig')) {
+      try {
+        $twig = \Drupal::service('twig');
+        
+        // Use reflection to ensure debug is enabled
+        $reflection = new \ReflectionClass($twig);
+        
+        if ($reflection->hasProperty('debug')) {
+          $debugProperty = $reflection->getProperty('debug');
+          $debugProperty->setAccessible(TRUE);
+          $debugProperty->setValue($twig, TRUE);
+        }
+        
+        if ($reflection->hasProperty('autoReload')) {
+          $autoReloadProperty = $reflection->getProperty('autoReload');
+          $autoReloadProperty->setAccessible(TRUE);
+          $autoReloadProperty->setValue($twig, TRUE);
+        }
+      }
+      catch (\Exception $e) {
+        // Ignore errors
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function twig_debug_switcher_theme($existing, $type, $theme, $path) {
+  return [
+    'twig_debug_test_page' => [
+      'variables' => [
+        'current_status' => FALSE,
+        'module_debug' => FALSE,
+        'twig_details' => [],
+      ],
+      'template' => 'twig-debug-test-page',
+    ],
+  ];
+}

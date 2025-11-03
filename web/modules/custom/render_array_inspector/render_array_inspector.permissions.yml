@@ -1,0 +1,4 @@
+access render array inspector:
+  title: 'Access Render Array Inspector'
+  description: 'View the render array structure in the toolbar.'
+  restrict access: true

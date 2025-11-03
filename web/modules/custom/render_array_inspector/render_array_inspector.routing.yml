@@ -1,0 +1,18 @@
+render_array_inspector.get_render_array:
+  path: '/admin/render-array-inspector/get-render-array'
+  defaults:
+    _controller: '\Drupal\render_array_inspector\Controller\RenderArrayInspectorController::getRenderArray'
+  requirements:
+    _permission: 'access render array inspector'
+  options:
+    _admin_route: TRUE
+
+render_array_inspector.settings:
+  path: '/admin/config/development/render-array-inspector'
+  defaults:
+    _form: '\Drupal\render_array_inspector\Form\RenderArrayInspectorSettingsForm'
+    _title: 'Render Array Inspector Settings'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Render Array Inspector module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function render_array_inspector_install() {
+  // Grant permission to administrator role by default.
+  $role = \Drupal\user\Entity\Role::load('administrator');
+  if ($role) {
+    $role->grantPermission('access render array inspector');
+    $role->save();
+  }
+
+  \Drupal::messenger()->addMessage(t('Render Array Inspector has been installed. Grant the "Access Render Array Inspector" permission to roles that should be able to use this tool.'));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function render_array_inspector_uninstall() {
+  // Clean up configuration.
+  \Drupal::configFactory()->getEditable('render_array_inspector.settings')->delete();
+}

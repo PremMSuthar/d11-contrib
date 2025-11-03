@@ -1,0 +1,19 @@
+twig_debug_switcher.settings:
+  path: '/admin/config/development/twig-debug-switcher'
+  defaults:
+    _form: '\Drupal\twig_debug_switcher\Form\TwigDebugSwitcherSettingsForm'
+    _title: 'Twig Debug Switcher'
+  requirements:
+    _permission: 'administer twig debug switcher'
+  options:
+    _admin_route: TRUE
+
+twig_debug_switcher.test:
+  path: '/admin/config/development/twig-debug-switcher/test'
+  defaults:
+    _controller: '\Drupal\twig_debug_switcher\Controller\TwigDebugTestController::testPage'
+    _title: 'Twig Debug Test'
+  requirements:
+    _permission: 'administer twig debug switcher'
+  options:
+    _admin_route: TRUE

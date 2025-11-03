@@ -1,0 +1,19 @@
+bootstrap_purge.settings:
+  route_name: bootstrap_purge.settings
+  title: 'Settings'
+  base_route: bootstrap_purge.settings
+
+bootstrap_purge.dashboard:
+  route_name: bootstrap_purge.dashboard
+  title: 'Dashboard'
+  base_route: bootstrap_purge.settings
+
+bootstrap_purge.assets:
+  route_name: bootstrap_purge.assets
+  title: 'Assets'
+  base_route: bootstrap_purge.settings
+
+bootstrap_purge.whitelist:
+  route_name: bootstrap_purge.whitelist
+  title: 'Whitelist'
+  base_route: bootstrap_purge.settings

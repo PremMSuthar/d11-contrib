@@ -1,0 +1,25 @@
+name: 'Site Analyzer'
+type: module
+description: 'Comprehensive site analysis tool for Drupal upgrade planning and development insights'
+package: 'Custom'
+version: '1.0.0'
+core_version_requirement: ^10 || ^11
+
+dependencies:
+  - drupal:system
+  - drupal:user
+  - drupal:node
+  - drupal:field
+  - drupal:file
+  - drupal:taxonomy
+  - drupal:menu_link_content
+  - drupal:block
+  - drupal:views
+
+configure: site_analyzer.settings
+
+# Optional dependencies for enhanced functionality
+suggests:
+  - drupal:update
+  - drupal:dblog
+  - drupal:help

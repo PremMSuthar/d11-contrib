@@ -1,0 +1,64 @@
+{#
+/**
+ * @file
+ * Template for Bootstrap Purge asset diff view.
+ *
+ * Available variables:
+ * - original_content: Original asset content
+ * - purged_content: Purged asset content
+ * - removed_selectors: Array of removed selectors
+ * - file_path: Path to the asset file
+ */
+#}
+
+<div class="bootstrap-purge-diff-viewer">
+  <h2>{{ 'Asset Diff: @file'|t({'@file': file_path}) }}</h2>
+  
+  {% if removed_selectors %}
+    <details class="bootstrap-purge-removed-selectors">
+      <summary>{{ 'Removed Selectors (@count)'|t({'@count': removed_selectors|length}) }}</summary>
+      <div class="selectors-list">
+        {% for selector in removed_selectors %}
+          <span class="selector-item">{{ selector }}</span>
+        {% endfor %}
+      </div>
+    </details>
+  {% endif %}
+
+  <div class="diff-content">
+    <div class="diff-panel">
+      <div class="diff-panel-header">{{ 'Original'|t }}</div>
+      <div class="diff-panel-content">
+        <div class="original-content">
+          <pre>{{ original_content }}</pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="diff-panel">
+      <div class="diff-panel-header">{{ 'Purged'|t }}</div>
+      <div class="diff-panel-content">
+        <div class="purged-content">
+          <pre>{{ purged_content }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="diff-stats">
+    {% set original_size = original_content|length %}
+    {% set purged_size = purged_content|length %}
+    {% set savings = original_size - purged_size %}
+    {% set savings_percent = original_size > 0 ? ((savings / original_size) * 100)|round(1) : 0 %}
+    
+    <p>
+      <strong>{{ 'Size Comparison:'|t }}</strong>
+      {{ 'Original: @original, Purged: @purged, Savings: @savings (@percent%)'|t({
+        '@original': original_size|format_size,
+        '@purged': purged_size|format_size,
+        '@savings': savings|format_size,
+        '@percent': savings_percent
+      }) }}
+    </p>
+  </div>
+</div>

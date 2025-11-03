@@ -1,0 +1,4 @@
+administer twig debug switcher:
+  title: 'Administer Twig Debug Switcher'
+  description: 'Allow users to toggle Twig debug mode on and off.'
+  restrict access: TRUE

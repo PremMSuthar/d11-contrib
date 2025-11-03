@@ -1,0 +1,23 @@
+configured: false
+analysis_depth: 'standard'
+automated_monitoring: false
+monitoring_interval: 86400
+send_alerts: false
+alert_email: ''
+alert_thresholds:
+  memory_threshold: 80
+  disk_threshold: 90
+  security_updates: true
+report_retention: 2592000
+include_sensitive_data: false
+max_execution_time: 300
+memory_limit: ''
+batch_size: 100
+enable_code_scanning: true
+scan_custom_modules: true
+scan_custom_themes: true
+drupal_org_api: true
+api_timeout: 30
+custom_logo: null
+company_name: ''
+report_footer: ''

@@ -1,0 +1,54 @@
+# Primary tabs for Site Analyzer sections
+site_analyzer.dashboard:
+  route_name: site_analyzer.dashboard
+  title: 'Dashboard'
+  base_route: site_analyzer.dashboard
+  weight: 0
+
+site_analyzer.system_analysis:
+  route_name: site_analyzer.system_analysis
+  title: 'System'
+  base_route: site_analyzer.dashboard
+  weight: 1
+
+site_analyzer.module_analysis:
+  route_name: site_analyzer.module_analysis
+  title: 'Modules'
+  base_route: site_analyzer.dashboard
+  weight: 2
+
+site_analyzer.theme_analysis:
+  route_name: site_analyzer.theme_analysis
+  title: 'Themes'
+  base_route: site_analyzer.dashboard
+  weight: 3
+
+site_analyzer.content_analysis:
+  route_name: site_analyzer.content_analysis
+  title: 'Content'
+  base_route: site_analyzer.dashboard
+  weight: 4
+
+site_analyzer.database_analysis:
+  route_name: site_analyzer.database_analysis
+  title: 'Database'
+  base_route: site_analyzer.dashboard
+  weight: 5
+
+site_analyzer.security_analysis:
+  route_name: site_analyzer.security_analysis
+  title: 'Security'
+  base_route: site_analyzer.dashboard
+  weight: 6
+
+site_analyzer.performance_analysis:
+  route_name: site_analyzer.performance_analysis
+  title: 'Performance'
+  base_route: site_analyzer.dashboard
+  weight: 7
+
+site_analyzer.upgrade_report:
+  route_name: site_analyzer.upgrade_report
+  title: 'Upgrade'
+  base_route: site_analyzer.dashboard
+  weight: 8

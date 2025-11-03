@@ -1,0 +1,71 @@
+bootstrap_purge.settings:
+  path: '/admin/config/development/bootstrap-purge'
+  defaults:
+    _form: '\Drupal\bootstrap_purge\Form\BootstrapPurgeSettingsForm'
+    _title: 'Bootstrap Purge Settings'
+  requirements:
+    _permission: 'administer bootstrap purge'
+
+bootstrap_purge.dashboard:
+  path: '/admin/config/development/bootstrap-purge/dashboard'
+  defaults:
+    _controller: '\Drupal\bootstrap_purge\Controller\BootstrapPurgeController::dashboard'
+    _title: 'Bootstrap Purge Dashboard'
+  requirements:
+    _permission: 'administer bootstrap purge'
+
+bootstrap_purge.assets:
+  path: '/admin/config/development/bootstrap-purge/assets'
+  defaults:
+    _controller: '\Drupal\bootstrap_purge\Controller\BootstrapPurgeController::assetsList'
+    _title: 'Assets Management'
+  requirements:
+    _permission: 'administer bootstrap purge'
+
+bootstrap_purge.asset_diff:
+  path: '/admin/config/development/bootstrap-purge/assets/{asset_id}/diff'
+  defaults:
+    _controller: '\Drupal\bootstrap_purge\Controller\BootstrapPurgeController::assetDiff'
+    _title: 'Asset Diff View'
+  requirements:
+    _permission: 'administer bootstrap purge'
+
+bootstrap_purge.asset_approve:
+  path: '/admin/config/development/bootstrap-purge/assets/{asset_id}/approve'
+  defaults:
+    _controller: '\Drupal\bootstrap_purge\Controller\BootstrapPurgeController::approveAsset'
+  requirements:
+    _permission: 'administer bootstrap purge'
+    _csrf_token: 'TRUE'
+
+bootstrap_purge.asset_reject:
+  path: '/admin/config/development/bootstrap-purge/assets/{asset_id}/reject'
+  defaults:
+    _controller: '\Drupal\bootstrap_purge\Controller\BootstrapPurgeController::rejectAsset'
+  requirements:
+    _permission: 'administer bootstrap purge'
+    _csrf_token: 'TRUE'
+
+bootstrap_purge.whitelist:
+  path: '/admin/config/development/bootstrap-purge/whitelist'
+  defaults:
+    _form: '\Drupal\bootstrap_purge\Form\WhitelistForm'
+    _title: 'Whitelist Management'
+  requirements:
+    _permission: 'administer bootstrap purge'
+
+bootstrap_purge.runtime_data:
+  path: '/bootstrap-purge/runtime-data'
+  defaults:
+    _controller: '\Drupal\bootstrap_purge\Controller\RuntimeDataController::collect'
+  requirements:
+    _access: 'TRUE'
+  methods: [POST]
+
+bootstrap_purge.preview:
+  path: '/admin/config/development/bootstrap-purge/preview/{asset_id}'
+  defaults:
+    _controller: '\Drupal\bootstrap_purge\Controller\BootstrapPurgeController::previewAsset'
+    _title: 'Preview Purged Asset'
+  requirements:
+    _permission: 'administer bootstrap purge'

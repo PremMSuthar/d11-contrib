@@ -1,0 +1,224 @@
+{#
+/**
+ * @file
+ * Simplified template for unified Module & Theme analysis - display only.
+ *
+ * Available variables:
+ * - unified_data: Array of unified module and theme data
+ * - module_data: Raw module analysis data
+ * - theme_data: Raw theme analysis data
+ * - summary_stats: Summary statistics
+ * - navigation: Navigation links
+ */
+#}
+
+<div class="site-analyzer-unified-extensions-simple">
+  <div class="unified-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">🧩</span>
+        {{ 'Extensions Information'|t }}
+      </h1>
+      <p class="page-description">
+        {{ 'Complete list of modules and themes installed on this site.'|t }}
+      </p>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {# Summary Statistics Cards #}
+  <div class="summary-cards">
+    <div class="summary-card total-card">
+      <div class="card-icon">📦</div>
+      <div class="card-content">
+        <div class="card-number">{{ summary_stats.total_items|default(0) }}</div>
+        <div class="card-label">{{ 'Total Extensions'|t }}</div>
+        <div class="card-breakdown">
+          <span class="breakdown-item">{{ summary_stats.modules_count|default(0) }} {{ 'Modules'|t }}</span>
+          <span class="breakdown-item">{{ summary_stats.themes_count|default(0) }} {{ 'Themes'|t }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card enabled-card">
+      <div class="card-icon">✅</div>
+      <div class="card-content">
+        <div class="card-number">{{ summary_stats.enabled_count|default(0) }}</div>
+        <div class="card-label">{{ 'Enabled'|t }}</div>
+      </div>
+    </div>
+
+    <div class="summary-card disabled-card">
+      <div class="card-icon">⏸️</div>
+      <div class="card-content">
+        <div class="card-number">{{ summary_stats.disabled_count|default(0) }}</div>
+        <div class="card-label">{{ 'Disabled'|t }}</div>
+      </div>
+    </div>
+
+    <div class="summary-card category-card">
+      <div class="card-icon">📊</div>
+      <div class="card-content">
+        <div class="card-label">{{ 'Categories'|t }}</div>
+        <div class="card-breakdown">
+          <span class="breakdown-item">{{ summary_stats.core_count|default(0) }} {{ 'Core'|t }}</span>
+          <span class="breakdown-item">{{ summary_stats.contrib_count|default(0) }} {{ 'Contrib'|t }}</span>
+          <span class="breakdown-item">{{ summary_stats.custom_count|default(0) }} {{ 'Custom'|t }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Filter and Search Bar #}
+  <div class="filter-bar">
+    <div class="filter-section">
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="{{ 'Search extensions...'|t }}" id="extension-search">
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+    
+    <div class="filter-section">
+      <select class="filter-select" id="type-filter">
+        <option value="all">{{ 'All Types'|t }}</option>
+        <option value="module">{{ 'Modules Only'|t }}</option>
+        <option value="theme">{{ 'Themes Only'|t }}</option>
+      </select>
+      
+      <select class="filter-select" id="status-filter">
+        <option value="all">{{ 'All Status'|t }}</option>
+        <option value="enabled">{{ 'Enabled'|t }}</option>
+        <option value="disabled">{{ 'Disabled'|t }}</option>
+      </select>
+      
+      <select class="filter-select" id="category-filter">
+        <option value="all">{{ 'All Categories'|t }}</option>
+        <option value="core">{{ 'Core'|t }}</option>
+        <option value="contrib">{{ 'Contributed'|t }}</option>
+        <option value="custom">{{ 'Custom'|t }}</option>
+      </select>
+    </div>
+    
+    <div class="filter-section">
+      <button class="btn btn-outline clear-filters-btn">{{ 'Clear Filters'|t }}</button>
+    </div>
+  </div>
+
+  {# Extensions Table #}
+  <div class="extensions-table-container">
+    <table class="extensions-table" id="extensions-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="display_name">
+            {{ 'Name'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="type">
+            {{ 'Type'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="status">
+            {{ 'Status'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="category">
+            {{ 'Category'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="version">
+            {{ 'Version'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="package">
+            {{ 'Package'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if unified_data is defined and unified_data is not empty %}
+        {% for item in unified_data %}
+          <tr class="extension-row" 
+              data-name="{{ item.name }}" 
+              data-type="{{ item.type }}" 
+              data-status="{{ item.status }}" 
+              data-category="{{ item.category }}">
+            <td class="name-column">
+              <div class="extension-info">
+                <div class="extension-name">
+                  <span class="type-icon">{{ item.type == 'module' ? '🧩' : '🎨' }}</span>
+                  <strong>{{ item.display_name }}</strong>
+                  {% if item.category == 'custom' %}
+                    <span class="badge badge-custom">{{ 'Custom'|t }}</span>
+                  {% elseif item.category == 'core' %}
+                    <span class="badge badge-core">{{ 'Core'|t }}</span>
+                  {% endif %}
+                </div>
+                {% if item.description %}
+                  <div class="extension-description">{{ item.description }}</div>
+                {% endif %}
+                {% if item.dependencies and item.dependencies is not empty %}
+                  <div class="extension-dependencies">
+                    <strong>{{ 'Dependencies:'|t }}</strong> {{ item.dependencies|join(', ') }}
+                  </div>
+                {% endif %}
+                {% if item.required_by and item.required_by is not empty %}
+                  <div class="extension-required-by">
+                    <strong>{{ 'Required by:'|t }}</strong> {{ item.required_by|join(', ') }}
+                  </div>
+                {% endif %}
+              </div>
+            </td>
+            <td class="type-column">
+              <span class="type-badge type-{{ item.type }}">
+                {{ item.type|title }}
+              </span>
+            </td>
+            <td class="status-column">
+              <span class="status-badge status-{{ item.status }}">
+                {{ item.status|title }}
+              </span>
+            </td>
+            <td class="category-column">
+              <span class="category-badge category-{{ item.category }}">
+                {{ item.category|title }}
+              </span>
+            </td>
+            <td class="version-column">
+              <span class="version-text">{{ item.version }}</span>
+              {% if item.core_compatibility %}
+                <div class="core-compat">{{ 'Core:'|t }} {{ item.core_compatibility }}</div>
+              {% endif %}
+              {% if item.last_updated %}
+                <div class="last-updated">{{ 'Updated:'|t }} {{ item.last_updated|date('Y-m-d') }}</div>
+              {% endif %}
+            </td>
+            <td class="package-column">
+              <span class="package-text">{{ item.package|default('Other') }}</span>
+              {% if item.type == 'theme' and item.base_theme %}
+                <div class="base-theme">{{ 'Base:'|t }} {{ item.base_theme }}</div>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="text-center">
+              <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <div class="empty-message">{{ 'No extensions found.'|t }}</div>
+              </div>
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>

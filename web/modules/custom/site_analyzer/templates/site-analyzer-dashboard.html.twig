@@ -1,0 +1,274 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer dashboard.
+ *
+ * Available variables:
+ * - system_info: System information summary
+ * - module_summary: Module analysis summary
+ * - theme_summary: Theme analysis summary
+ * - content_summary: Content analysis summary
+ * - security_summary: Security analysis summary
+ * - performance_summary: Performance analysis summary
+ * - upgrade_summary: Upgrade readiness summary
+ */
+#}
+
+<div class="site-analyzer-dashboard">
+  <div class="dashboard-header">
+    <h1>{{ 'Site Health Dashboard'|t }}</h1>
+    <p class="dashboard-description">{{ 'Comprehensive analysis of your Drupal site\'s health, performance, and upgrade readiness.'|t }}</p>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  <div class="dashboard-grid">
+    {# System Health Card #}
+    <div class="dashboard-card system-card">
+      <div class="card-header">
+        <h3>{{ 'System Health'|t }}</h3>
+        <span class="status-indicator status-{{ system_info.status }}">{{ system_info.status|title }}</span>
+      </div>
+      <div class="card-content">
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Drupal Version'|t }}:</span>
+          <span class="metric-value">{{ system_info.drupal_version }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'PHP Version'|t }}:</span>
+          <span class="metric-value">{{ system_info.php_version }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Database'|t }}:</span>
+          <span class="metric-value">{{ system_info.database_type }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Memory Usage'|t }}:</span>
+          <span class="metric-value">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {{ system_info.memory_usage }}%"></div>
+            </div>
+            {{ system_info.memory_usage }}%
+          </span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Disk Usage'|t }}:</span>
+          <span class="metric-value">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {{ system_info.disk_usage }}%"></div>
+            </div>
+            {{ system_info.disk_usage }}%
+          </span>
+        </div>
+      </div>
+    </div>
+
+    {# Modules Card #}
+    <div class="dashboard-card modules-card">
+      <div class="card-header">
+        <h3>{{ 'Modules'|t }}</h3>
+        <span class="status-indicator status-{{ module_summary.status }}">{{ module_summary.status|title }}</span>
+      </div>
+      <div class="card-content">
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Total Modules'|t }}:</span>
+          <span class="metric-value">{{ module_summary.total_count }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Enabled'|t }}:</span>
+          <span class="metric-value">{{ module_summary.enabled_count }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Custom Modules'|t }}:</span>
+          <span class="metric-value">{{ module_summary.custom_count }}</span>
+        </div>
+        {% if module_summary.security_updates > 0 %}
+        <div class="metric-row alert">
+          <span class="metric-label">{{ 'Security Updates'|t }}:</span>
+          <span class="metric-value critical">{{ module_summary.security_updates }}</span>
+        </div>
+        {% endif %}
+        {% if module_summary.deprecated_count > 0 %}
+        <div class="metric-row warning">
+          <span class="metric-label">{{ 'Deprecated'|t }}:</span>
+          <span class="metric-value">{{ module_summary.deprecated_count }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Themes Card #}
+    <div class="dashboard-card themes-card">
+      <div class="card-header">
+        <h3>{{ 'Themes'|t }}</h3>
+        <span class="status-indicator status-{{ theme_summary.status }}">{{ theme_summary.status|title }}</span>
+      </div>
+      <div class="card-content">
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Total Themes'|t }}:</span>
+          <span class="metric-value">{{ theme_summary.total_count }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Default Theme'|t }}:</span>
+          <span class="metric-value">{{ theme_summary.default_theme }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Admin Theme'|t }}:</span>
+          <span class="metric-value">{{ theme_summary.admin_theme ?: 'Default'|t }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Custom Themes'|t }}:</span>
+          <span class="metric-value">{{ theme_summary.custom_count }}</span>
+        </div>
+      </div>
+    </div>
+
+    {# Content Card #}
+    <div class="dashboard-card content-card">
+      <div class="card-header">
+        <h3>{{ 'Content'|t }}</h3>
+        <span class="status-indicator status-{{ content_summary.status }}">{{ content_summary.status|title }}</span>
+      </div>
+      <div class="card-content">
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Content Types'|t }}:</span>
+          <span class="metric-value">{{ content_summary.content_types }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Total Nodes'|t }}:</span>
+          <span class="metric-value">{{ content_summary.total_nodes|number_format }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Users'|t }}:</span>
+          <span class="metric-value">{{ content_summary.total_users|number_format }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Files'|t }}:</span>
+          <span class="metric-value">{{ content_summary.total_files|number_format }}</span>
+        </div>
+        {% if content_summary.deprecated_fields > 0 %}
+        <div class="metric-row warning">
+          <span class="metric-label">{{ 'Deprecated Fields'|t }}:</span>
+          <span class="metric-value">{{ content_summary.deprecated_fields }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Security Card #}
+    <div class="dashboard-card security-card">
+      <div class="card-header">
+        <h3>{{ 'Security'|t }}</h3>
+        <span class="status-indicator status-{{ security_summary.status }}">{{ security_summary.status|title }}</span>
+      </div>
+      <div class="card-content">
+        {% if security_summary.security_updates > 0 %}
+        <div class="metric-row alert">
+          <span class="metric-label">{{ 'Security Updates'|t }}:</span>
+          <span class="metric-value critical">{{ security_summary.security_updates }}</span>
+        </div>
+        {% endif %}
+        {% if security_summary.vulnerabilities > 0 %}
+        <div class="metric-row alert">
+          <span class="metric-label">{{ 'Vulnerabilities'|t }}:</span>
+          <span class="metric-value critical">{{ security_summary.vulnerabilities }}</span>
+        </div>
+        {% endif %}
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Risky Permissions'|t }}:</span>
+          <span class="metric-value {{ security_summary.risky_permissions > 5 ? 'warning' : '' }}">{{ security_summary.risky_permissions }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'File Permission Issues'|t }}:</span>
+          <span class="metric-value {{ security_summary.file_permission_issues > 0 ? 'warning' : '' }}">{{ security_summary.file_permission_issues }}</span>
+        </div>
+      </div>
+    </div>
+
+    {# Performance Card #}
+    <div class="dashboard-card performance-card">
+      <div class="card-header">
+        <h3>{{ 'Performance'|t }}</h3>
+        <span class="status-indicator status-{{ performance_summary.status }}">{{ performance_summary.status|title }}</span>
+      </div>
+      <div class="card-content">
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Page Cache'|t }}:</span>
+          <span class="metric-value {{ performance_summary.page_cache_enabled ? 'good' : 'warning' }}">
+            {{ performance_summary.page_cache_enabled ? 'Enabled'|t : 'Disabled'|t }}
+          </span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'CSS Aggregation'|t }}:</span>
+          <span class="metric-value {{ performance_summary.css_aggregation ? 'good' : 'warning' }}">
+            {{ performance_summary.css_aggregation ? 'Enabled'|t : 'Disabled'|t }}
+          </span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'JS Aggregation'|t }}:</span>
+          <span class="metric-value {{ performance_summary.js_aggregation ? 'good' : 'warning' }}">
+            {{ performance_summary.js_aggregation ? 'Enabled'|t : 'Disabled'|t }}
+          </span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Memory Usage'|t }}:</span>
+          <span class="metric-value {{ performance_summary.memory_usage > 80 ? 'warning' : 'good' }}">{{ performance_summary.memory_usage }}%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Cache Hit Rate'|t }}:</span>
+          <span class="metric-value {{ performance_summary.cache_hit_rate < 70 ? 'warning' : 'good' }}">{{ performance_summary.cache_hit_rate }}%</span>
+        </div>
+      </div>
+    </div>
+
+    {# Upgrade Readiness Card #}
+    <div class="dashboard-card upgrade-card">
+      <div class="card-header">
+        <h3>{{ 'Upgrade Readiness'|t }}</h3>
+        <span class="status-indicator status-{{ upgrade_summary.readiness_level }}">{{ upgrade_summary.readiness_level|title }}</span>
+      </div>
+      <div class="card-content">
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Readiness Score'|t }}:</span>
+          <span class="metric-value">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {{ upgrade_summary.readiness_score }}%"></div>
+            </div>
+            {{ upgrade_summary.readiness_score }}%
+          </span>
+        </div>
+        {% if upgrade_summary.compatibility_issues > 0 %}
+        <div class="metric-row warning">
+          <span class="metric-label">{{ 'Compatibility Issues'|t }}:</span>
+          <span class="metric-value">{{ upgrade_summary.compatibility_issues }}</span>
+        </div>
+        {% endif %}
+        {% if upgrade_summary.deprecated_usage > 0 %}
+        <div class="metric-row warning">
+          <span class="metric-label">{{ 'Deprecated Usage'|t }}:</span>
+          <span class="metric-value">{{ upgrade_summary.deprecated_usage }}</span>
+        </div>
+        {% endif %}
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Custom Code Items'|t }}:</span>
+          <span class="metric-value">{{ upgrade_summary.custom_code_count }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Estimated Effort'|t }}:</span>
+          <span class="metric-value">{{ upgrade_summary.estimated_effort_hours }} {{ 'hours'|t }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">{{ 'Risk Level'|t }}:</span>
+          <span class="metric-value risk-{{ upgrade_summary.risk_level }}">{{ upgrade_summary.risk_level|title }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,59 @@
+/**
+ * @file
+ * Enhanced System Analysis styles.
+ */
+
+/* Additional styles specific to system analysis */
+.site-analyzer-system-enhanced .tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
+.site-analyzer-system-enhanced .version-recommendations .recommendation:hover {
+  background: #f8f9fa;
+  transition: background 0.2s ease;
+}
+
+.site-analyzer-system-enhanced .health-score-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .site-analyzer-system-enhanced .unified-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .site-analyzer-system-enhanced .health-score-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .site-analyzer-system-enhanced .environment-overview {
+    grid-template-columns: 1fr;
+  }
+  
+  .site-analyzer-system-enhanced .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .site-analyzer-system-enhanced .tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .site-analyzer-system-enhanced .header-actions,
+  .site-analyzer-system-enhanced .refresh-btn {
+    display: none;
+  }
+  
+  .site-analyzer-system-enhanced .analysis-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

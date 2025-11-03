@@ -1,0 +1,358 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer upgrade readiness report.
+ *
+ * Available variables:
+ * - compatibility_matrix: Module and theme compatibility information
+ * - breaking_changes: List of breaking changes that need attention
+ * - migration_recommendations: Recommendations for the migration process
+ * - effort_estimation: Estimated time and effort for the upgrade
+ * - risk_assessment: Risk analysis for the upgrade
+ */
+#}
+
+<div class="site-analyzer-upgrade-report">
+  <div class="report-header">
+    <h1>{{ 'Drupal Upgrade Readiness Report'|t }}</h1>
+    <div class="report-meta">
+      <span class="report-date">{{ 'Generated on'|t }} {{ "now"|date("Y-m-d H:i:s") }}</span>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {# Executive Summary #}
+  <div class="executive-summary">
+    <h3>{{ 'Executive Summary'|t }}</h3>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h4>{{ 'Overall Risk'|t }}</h4>
+        <span class="risk-indicator risk-{{ risk_assessment.overall_risk }}">
+          {{ risk_assessment.overall_risk|title }}
+        </span>
+      </div>
+      <div class="summary-card">
+        <h4>{{ 'Estimated Effort'|t }}</h4>
+        <span class="effort-indicator">
+          {{ effort_estimation.total_hours }} {{ 'hours'|t }}
+        </span>
+        <small>({{ effort_estimation.complexity|title }} {{ 'complexity'|t }})</small>
+      </div>
+      <div class="summary-card">
+        <h4>{{ 'Breaking Changes'|t }}</h4>
+        <span class="changes-indicator {{ breaking_changes|length > 0 ? 'has-changes' : 'no-changes' }}">
+          {{ breaking_changes|length }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {# Compatibility Matrix #}
+  <div class="compatibility-section">
+    <h3>{{ 'Compatibility Matrix'|t }}</h3>
+    
+    <div class="compatibility-grid">
+      <div class="compatibility-category">
+        <h4>{{ 'Modules'|t }}</h4>
+        <div class="compatibility-stats">
+          <div class="stat-item compatible">
+            <span class="stat-number">{{ compatibility_matrix.modules.compatible|length }}</span>
+            <span class="stat-label">{{ 'Compatible'|t }}</span>
+          </div>
+          <div class="stat-item incompatible">
+            <span class="stat-number">{{ compatibility_matrix.modules.incompatible|length }}</span>
+            <span class="stat-label">{{ 'Incompatible'|t }}</span>
+          </div>
+          <div class="stat-item unknown">
+            <span class="stat-number">{{ compatibility_matrix.modules.unknown|length }}</span>
+            <span class="stat-label">{{ 'Unknown'|t }}</span>
+          </div>
+        </div>
+        
+        {% if compatibility_matrix.modules.incompatible|length > 0 %}
+        <div class="incompatible-items">
+          <h5>{{ 'Incompatible Modules'|t }}</h5>
+          <ul>
+            {% for module_name, module in compatibility_matrix.modules.incompatible %}
+            <li>
+              <strong>{{ module.display_name }}</strong>
+              {% if module.compatibility_issues %}
+                <ul class="issues-list">
+                  {% for issue in module.compatibility_issues %}
+                  <li class="issue-{{ issue.type }}">{{ issue.message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="compatibility-category">
+        <h4>{{ 'Themes'|t }}</h4>
+        <div class="compatibility-stats">
+          <div class="stat-item compatible">
+            <span class="stat-number">{{ compatibility_matrix.themes.compatible|length }}</span>
+            <span class="stat-label">{{ 'Compatible'|t }}</span>
+          </div>
+          <div class="stat-item incompatible">
+            <span class="stat-number">{{ compatibility_matrix.themes.incompatible|length }}</span>
+            <span class="stat-label">{{ 'Incompatible'|t }}</span>
+          </div>
+          <div class="stat-item unknown">
+            <span class="stat-number">{{ compatibility_matrix.themes.unknown|length }}</span>
+            <span class="stat-label">{{ 'Unknown'|t }}</span>
+          </div>
+        </div>
+
+        {% if compatibility_matrix.themes.incompatible|length > 0 %}
+        <div class="incompatible-items">
+          <h5>{{ 'Incompatible Themes'|t }}</h5>
+          <ul>
+            {% for theme_name, theme in compatibility_matrix.themes.incompatible %}
+            <li>
+              <strong>{{ theme.display_name }}</strong>
+              {% if theme.compatibility_issues %}
+                <ul class="issues-list">
+                  {% for issue in theme.compatibility_issues %}
+                  <li class="issue-{{ issue.type }}">{{ issue.message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Breaking Changes #}
+  {% if breaking_changes|length > 0 %}
+  <div class="breaking-changes-section">
+    <h3>{{ 'Breaking Changes'|t }}</h3>
+    <p class="section-description">{{ 'The following changes require immediate attention before upgrading:'|t }}</p>
+    
+    <div class="breaking-changes-list">
+      {% for change in breaking_changes %}
+      <div class="breaking-change severity-{{ change.severity }}">
+        <div class="change-header">
+          <h4>{{ change.type|title|replace({'_': ' '}) }}</h4>
+          <span class="severity-badge">{{ change.severity|title }}</span>
+        </div>
+        <div class="change-details">
+          <p><strong>{{ 'Location'|t }}:</strong> {{ change.location }}</p>
+          {% if change.function %}
+          <p><strong>{{ 'Function'|t }}:</strong> <code>{{ change.function }}</code></p>
+          {% endif %}
+          {% if change.file %}
+          <p><strong>{{ 'File'|t }}:</strong> <code>{{ change.file }}</code></p>
+          {% endif %}
+          {% if change.line %}
+          <p><strong>{{ 'Line'|t }}:</strong> {{ change.line }}</p>
+          {% endif %}
+          {% if change.replacement %}
+          <p><strong>{{ 'Replacement'|t }}:</strong> {{ change.replacement }}</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Migration Recommendations #}
+  <div class="recommendations-section">
+    <h3>{{ 'Migration Recommendations'|t }}</h3>
+    
+    {% if migration_recommendations|length > 0 %}
+    <div class="recommendations-list">
+      {% for recommendation in migration_recommendations %}
+      <div class="recommendation priority-{{ recommendation.priority }}">
+        <div class="recommendation-header">
+          <h4>{{ recommendation.title }}</h4>
+          <span class="priority-badge">{{ recommendation.priority|title }} {{ 'Priority'|t }}</span>
+        </div>
+        <div class="recommendation-content">
+          <p>{{ recommendation.description }}</p>
+          <div class="recommendation-meta">
+            <span class="category">{{ 'Category'|t }}: {{ recommendation.category|title }}</span>
+            <span class="effort">{{ 'Effort'|t }}: {{ recommendation.effort|title }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-recommendations">{{ 'No specific migration recommendations at this time.'|t }}</p>
+    {% endif %}
+  </div>
+
+  {# Effort Estimation #}
+  <div class="effort-estimation-section">
+    <h3>{{ 'Effort Estimation'|t }}</h3>
+    
+    <div class="effort-overview">
+      <div class="total-effort">
+        <h4>{{ 'Total Estimated Effort'|t }}</h4>
+        <span class="effort-hours">{{ effort_estimation.total_hours }} {{ 'hours'|t }}</span>
+        <span class="effort-complexity">({{ effort_estimation.complexity|title }} {{ 'Complexity'|t }})</span>
+      </div>
+    </div>
+
+    <div class="effort-breakdown">
+      <h4>{{ 'Effort Breakdown'|t }}</h4>
+      <table class="effort-table">
+        <thead>
+          <tr>
+            <th>{{ 'Category'|t }}</th>
+            <th>{{ 'Hours'|t }}</th>
+            <th>{{ 'Percentage'|t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for category, hours in effort_estimation.breakdown %}
+          <tr>
+            <td>{{ category|title|replace({'_': ' '}) }}</td>
+            <td>{{ hours }}</td>
+            <td>{{ ((hours / effort_estimation.total_hours) * 100)|round(1) }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {# Risk Assessment #}
+  <div class="risk-assessment-section">
+    <h3>{{ 'Risk Assessment'|t }}</h3>
+    
+    <div class="risk-overview">
+      <div class="overall-risk">
+        <h4>{{ 'Overall Risk Level'|t }}</h4>
+        <span class="risk-level risk-{{ risk_assessment.overall_risk }}">
+          {{ risk_assessment.overall_risk|title }}
+        </span>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat">
+          <span class="risk-count">{{ risk_assessment.high_risk_count }}</span>
+          <span class="risk-label">{{ 'High Risk'|t }}</span>
+        </div>
+        <div class="risk-stat">
+          <span class="risk-count">{{ risk_assessment.medium_risk_count }}</span>
+          <span class="risk-label">{{ 'Medium Risk'|t }}</span>
+        </div>
+      </div>
+    </div>
+
+    {% if risk_assessment.risk_factors|length > 0 %}
+    <div class="risk-factors">
+      <h4>{{ 'Risk Factors'|t }}</h4>
+      {% for risk in risk_assessment.risk_factors %}
+      <div class="risk-factor risk-{{ risk.level }}">
+        <div class="risk-header">
+          <span class="risk-level-badge">{{ risk.level|title }}</span>
+          <span class="risk-category">{{ risk.category|title }}</span>
+        </div>
+        <div class="risk-content">
+          <p class="risk-description">{{ risk.description }}</p>
+          <p class="risk-mitigation"><strong>{{ 'Mitigation'|t }}:</strong> {{ risk.mitigation }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {# Timeline Suggestions #}
+  {% if timeline_suggestions %}
+  <div class="timeline-section">
+    <h3>{{ 'Suggested Timeline'|t }}</h3>
+    
+    <div class="timeline-overview">
+      <p><strong>{{ 'Total Duration'|t }}:</strong> {{ timeline_suggestions.total_duration }}</p>
+      <p><strong>{{ 'Critical Path'|t }}:</strong> {{ timeline_suggestions.critical_path }}</p>
+    </div>
+
+    <div class="timeline-phases">
+      {% for phase in timeline_suggestions.phases %}
+      <div class="timeline-phase">
+        <div class="phase-header">
+          <h4>{{ phase.phase }}</h4>
+          <span class="phase-duration">{{ phase.duration }}</span>
+        </div>
+        <div class="phase-tasks">
+          <ul>
+            {% for task in phase.tasks %}
+            <li>{{ task }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Preparation Checklist #}
+  {% if preparation_checklist %}
+  <div class="checklist-section">
+    <h3>{{ 'Preparation Checklist'|t }}</h3>
+    
+    <div class="checklist-phases">
+      <div class="checklist-phase">
+        <h4>{{ 'Pre-Upgrade'|t }}</h4>
+        <ul class="checklist">
+          {% for item in preparation_checklist.pre_upgrade %}
+          <li>
+            <input type="checkbox" id="pre-{{ loop.index }}" />
+            <label for="pre-{{ loop.index }}">{{ item }}</label>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="checklist-phase">
+        <h4>{{ 'During Upgrade'|t }}</h4>
+        <ul class="checklist">
+          {% for item in preparation_checklist.during_upgrade %}
+          <li>
+            <input type="checkbox" id="during-{{ loop.index }}" />
+            <label for="during-{{ loop.index }}">{{ item }}</label>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="checklist-phase">
+        <h4>{{ 'Post-Upgrade'|t }}</h4>
+        <ul class="checklist">
+          {% for item in preparation_checklist.post_upgrade %}
+          <li>
+            <input type="checkbox" id="post-{{ loop.index }}" />
+            <label for="post-{{ loop.index }}">{{ item }}</label>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="report-actions">
+    <a href="{{ path('site_analyzer.export', {'format': 'pdf'}) }}" class="button button--primary">{{ 'Export as PDF'|t }}</a>
+    <a href="{{ path('site_analyzer.export', {'format': 'csv'}) }}" class="button">{{ 'Export as CSV'|t }}</a>
+    <a href="{{ path('site_analyzer.dashboard') }}" class="button">{{ 'Back to Dashboard'|t }}</a>
+  </div>
+</div>

@@ -1,0 +1,341 @@
+/**
+ * @file
+ * Simple styles for the Render Array Inspector module.
+ */
+
+/* Toolbar icon - small and clean */
+.toolbar-icon-render-array:before {
+  content: "[]";
+  font-family: monospace;
+  font-weight: normal;
+  font-size: 11px;
+  color: #ffffff;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  line-height: 16px;
+  background: none;
+}
+
+/* Main container - smaller and cleaner */
+.render-array-inspector {
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  max-height: 400px;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Header - smaller and simpler */
+.inspector-header {
+  background: #f5f5f5;
+  border-bottom: 1px solid #cccccc;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inspector-header h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: #333333;
+}
+
+.inspector-controls {
+  display: flex;
+  gap: 5px;
+}
+
+/* Buttons - smaller and simpler */
+.btn {
+  background: #ffffff;
+  border: 1px solid #999999;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: normal;
+  color: #333333;
+}
+
+.btn:hover {
+  background: #f0f0f0;
+}
+
+.btn-refresh {
+  background: #e6ffe6;
+  border-color: #009900;
+  color: #006600;
+}
+
+.btn-refresh:hover {
+  background: #ccffcc;
+}
+
+.btn:disabled {
+  background: #f5f5f5;
+  color: #999999;
+  cursor: not-allowed;
+}
+
+/* Content area - more compact */
+.inspector-content {
+  padding: 10px;
+  background: #ffffff;
+}
+
+.loading {
+  text-align: center;
+  padding: 15px;
+  color: #666666;
+  font-weight: normal;
+  font-size: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 15px;
+  color: #666666;
+  border: 1px dashed #cccccc;
+  background: #fafafa;
+}
+
+.empty-state p {
+  margin: 5px 0;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+/* Data display */
+.data-container {
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #000000;
+}
+
+/* Page info - more compact */
+.page-info {
+  background: #f8f8f8;
+  border: 1px solid #dddddd;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.page-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 12px;
+  color: #333333;
+  font-weight: bold;
+}
+
+.info-line {
+  margin: 2px 0;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.info-label {
+  color: #666666;
+  display: inline-block;
+  width: 60px;
+}
+
+.info-value {
+  color: #0066cc;
+  font-weight: normal;
+}
+
+/* Tree structure - cleaner */
+.tree-container {
+  border: 1px solid #dddddd;
+  background: #ffffff;
+  margin-top: 10px;
+}
+
+.tree-header {
+  background: #f0f0f0;
+  border-bottom: 1px solid #dddddd;
+  padding: 6px 10px;
+  font-weight: bold;
+  font-size: 12px;
+  color: #333333;
+}
+
+.tree-content {
+  padding: 0;
+}
+
+/* Simple dump style - more compact */
+.simple-dump {
+  background: #fafafa;
+  padding: 8px;
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: #333333;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Data type colors - high contrast */
+.dump-key {
+  color: #0000cc;
+  font-weight: bold;
+}
+
+.dump-array {
+  color: #cc0000;
+  font-weight: bold;
+}
+
+.dump-string {
+  color: #009900;
+  font-weight: normal;
+}
+
+.dump-number {
+  color: #cc6600;
+  font-weight: bold;
+}
+
+.dump-boolean {
+  color: #9900cc;
+  font-weight: bold;
+}
+
+.dump-null {
+  color: #666666;
+  font-style: italic;
+  font-weight: bold;
+}
+
+.dump-other {
+  color: #cc0000;
+  font-weight: bold;
+}
+
+/* Messages */
+.message {
+  padding: 15px;
+  margin: 15px 0;
+  border: 2px solid;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.message-error {
+  background: #ffcccc;
+  border-color: #cc0000;
+  color: #cc0000;
+}
+
+.message-warning {
+  background: #ffffcc;
+  border-color: #ccaa00;
+  color: #cc9900;
+}
+
+.message-success {
+  background: #ccffcc;
+  border-color: #00cc00;
+  color: #009900;
+}
+
+/* Tree nodes for expandable content */
+.tree-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tree-item {
+  border-bottom: 1px solid #e0e0e0;
+  font-family: 'Courier New', 'Monaco', monospace;
+}
+
+.tree-item:last-child {
+  border-bottom: none;
+}
+
+.tree-node {
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+}
+
+.tree-node:hover {
+  background: #f0f0f0;
+}
+
+.tree-toggle {
+  width: 15px;
+  margin-right: 8px;
+  font-size: 12px;
+  color: #000000;
+  text-align: center;
+  font-weight: bold;
+}
+
+.tree-key {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #0000cc;
+}
+
+.tree-value {
+  color: #009900;
+  font-style: normal;
+}
+
+.tree-count {
+  margin-left: 8px;
+  color: #666666;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+/* Children */
+.tree-children {
+  padding-left: 25px;
+  border-left: 2px solid #cccccc;
+  margin-left: 15px;
+}
+
+.tree-children.collapsed {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .inspector-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .inspector-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .render-array-inspector {
+    font-size: 11px;
+    min-width: 300px;
+  }
+  
+  .btn {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}

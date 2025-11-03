@@ -1,0 +1,30 @@
+{#
+/**
+ * @file
+ * Simple template for the Render Array Inspector toolbar tray.
+ */
+#}
+<div class="render-array-inspector">
+  <div class="inspector-header">
+    <h3>Render Array Inspector</h3>
+    <div class="inspector-controls">
+      <button id="refresh-data" class="btn btn-refresh">Refresh</button>
+      <button id="expand-all" class="btn btn-expand">+ Expand All</button>
+      <button id="collapse-all" class="btn btn-collapse">- Collapse All</button>
+    </div>
+  </div>
+  
+  <div class="inspector-content">
+    <div id="loading-message" class="loading" style="display: none;">
+      Loading render array data...
+    </div>
+    
+    <div id="empty-message" class="empty-state">
+      <p>Click "Refresh" to load the render array for this page.</p>
+    </div>
+    
+    <div id="data-display" class="data-container" style="display: none;">
+      <!-- Data will be loaded here -->
+    </div>
+  </div>
+</div>

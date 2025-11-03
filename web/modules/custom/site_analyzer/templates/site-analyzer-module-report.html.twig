@@ -1,0 +1,345 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer module analysis report.
+ *
+ * Available variables:
+ * - module_data: Complete module analysis data
+ * - scan_results: Code scan results for modules
+ * - drupal_11_readiness: D11 compatibility information
+ * - detailed_analysis: Detailed per-module analysis
+ */
+#}
+
+<div class="site-analyzer-module-report">
+  <div class="report-header">
+    <h1>{{ 'Module Analysis Report'|t }}</h1>
+    <div class="report-summary">
+      <div class="summary-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ module_data.total_count }}</span>
+          <span class="stat-label">{{ 'Total Modules'|t }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ module_data.enabled_count }}</span>
+          <span class="stat-label">{{ 'Enabled'|t }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ module_data.core_modules|length }}</span>
+          <span class="stat-label">{{ 'Core'|t }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ module_data.contrib_modules|length }}</span>
+          <span class="stat-label">{{ 'Contrib'|t }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ module_data.custom_modules|length }}</span>
+          <span class="stat-label">{{ 'Custom'|t }}</span>
+        </div>
+      </div>
+      
+      <div class="readiness-indicator">
+        <div class="readiness-score">
+          <span class="score-number">{{ drupal_11_readiness.summary.readiness_percentage }}%</span>
+          <span class="score-label">{{ 'Drupal 11 Ready'|t }}</span>
+        </div>
+        <div class="readiness-breakdown">
+          <div class="ready-count">{{ drupal_11_readiness.summary.ready_count }} {{ 'Ready'|t }}</div>
+          <div class="needs-patch-count">{{ drupal_11_readiness.summary.needs_patch_count }} {{ 'Needs Patch'|t }}</div>
+          <div class="not-ready-count">{{ drupal_11_readiness.summary.not_ready_count }} {{ 'Not Ready'|t }}</div>
+          <div class="unknown-count">{{ drupal_11_readiness.summary.unknown_count }} {{ 'Unknown'|t }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  <div class="report-actions">
+    <button class="btn btn-primary scan-all-modules" data-action="scan-all">
+      🔍 {{ 'Scan All Modules'|t }}
+    </button>
+    <button class="btn btn-secondary scan-custom-only" data-action="scan-custom">
+      🔍 {{ 'Scan Custom Modules Only'|t }}
+    </button>
+    <button class="btn btn-info export-report" data-format="csv">
+      📊 {{ 'Export CSV'|t }}
+    </button>
+    <button class="btn btn-info export-report" data-format="json">
+      📄 {{ 'Export JSON'|t }}
+    </button>
+  </div>
+
+  <div class="module-filters">
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all">{{ 'All Modules'|t }} ({{ module_data.total_count }})</button>
+      <button class="filter-tab" data-filter="contrib">{{ 'Contrib'|t }} ({{ module_data.contrib_modules|length }})</button>
+      <button class="filter-tab" data-filter="custom">{{ 'Custom'|t }} ({{ module_data.custom_modules|length }})</button>
+      <button class="filter-tab" data-filter="core">{{ 'Core'|t }} ({{ module_data.core_modules|length }})</button>
+      <button class="filter-tab" data-filter="issues">{{ 'Issues'|t }} ({{ module_data.compatibility_issues|length + module_data.security_updates|length }})</button>
+    </div>
+    
+    <div class="filter-controls">
+      <input type="text" class="module-search" placeholder="{{ 'Search modules...'|t }}">
+      <select class="status-filter">
+        <option value="">{{ 'All Status'|t }}</option>
+        <option value="enabled">{{ 'Enabled'|t }}</option>
+        <option value="disabled">{{ 'Disabled'|t }}</option>
+      </select>
+      <select class="compatibility-filter">
+        <option value="">{{ 'All Compatibility'|t }}</option>
+        <option value="ready">{{ 'D11 Ready'|t }}</option>
+        <option value="needs_patch">{{ 'Needs Patch'|t }}</option>
+        <option value="not_ready">{{ 'Not Ready'|t }}</option>
+        <option value="unknown">{{ 'Unknown'|t }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="modules-table-container">
+    <table class="modules-table" id="modules-analysis-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="name">{{ 'Module'|t }}</th>
+          <th class="sortable" data-sort="type">{{ 'Type'|t }}</th>
+          <th class="sortable" data-sort="version">{{ 'Version'|t }}</th>
+          <th class="sortable" data-sort="status">{{ 'Status'|t }}</th>
+          <th class="sortable" data-sort="d11_status">{{ 'D11 Status'|t }}</th>
+          <th>{{ 'Issues'|t }}</th>
+          <th>{{ 'Actions'|t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for module_name, module in detailed_analysis %}
+          <tr class="module-row" 
+              data-module="{{ module_name }}" 
+              data-type="{{ module.basic_info.type }}" 
+              data-status="{{ module.basic_info.status }}"
+              data-d11-status="{{ module.compatibility.drupal_11_status.status }}">
+            
+            <td class="module-name">
+              <div class="module-info">
+                <strong class="name">{{ module.basic_info.display_name }}</strong>
+                <div class="machine-name">{{ module_name }}</div>
+                {% if module.basic_info.description %}
+                  <div class="description">{{ module.basic_info.description|slice(0, 100) }}{% if module.basic_info.description|length > 100 %}...{% endif %}</div>
+                {% endif %}
+              </div>
+            </td>
+            
+            <td class="module-type">
+              <span class="type-badge type-{{ module.basic_info.type }}">
+                {{ module.basic_info.type|capitalize }}
+              </span>
+            </td>
+            
+            <td class="module-version">
+              {{ module.basic_info.version }}
+              {% if module.update_info.update_available %}
+                <span class="update-available" title="{{ 'Update available'|t }}">⬆️</span>
+              {% endif %}
+            </td>
+            
+            <td class="module-status">
+              <span class="status-badge status-{{ module.basic_info.status }}">
+                {{ module.basic_info.status|capitalize }}
+              </span>
+            </td>
+            
+            <td class="d11-compatibility">
+              <span class="compatibility-badge compatibility-{{ module.compatibility.drupal_11_status.status }}">
+                {% if module.compatibility.drupal_11_status.status == 'ready' %}
+                  ✅ {{ 'Ready'|t }}
+                {% elseif module.compatibility.drupal_11_status.status == 'needs_patch' %}
+                  🔧 {{ 'Needs Patch'|t }}
+                {% elseif module.compatibility.drupal_11_status.status == 'not_ready' %}
+                  ❌ {{ 'Not Ready'|t }}
+                {% else %}
+                  ❓ {{ 'Unknown'|t }}
+                {% endif %}
+              </span>
+              {% if module.compatibility.drupal_11_status.patch_available %}
+                <a href="{{ module.compatibility.drupal_11_status.patch_url }}" class="patch-link" target="_blank" title="{{ 'View patch'|t }}">🔗</a>
+              {% endif %}
+            </td>
+            
+            <td class="module-issues">
+              {% set issue_count = 0 %}
+              {% if module.update_info.security_update %}
+                <span class="issue-badge security" title="{{ 'Security update available'|t }}">🔒</span>
+                {% set issue_count = issue_count + 1 %}
+              {% endif %}
+              {% if module.risk_assessment.overall_risk == 'high' %}
+                <span class="issue-badge high-risk" title="{{ 'High risk'|t }}">⚠️</span>
+                {% set issue_count = issue_count + 1 %}
+              {% endif %}
+              {% if module.basic_info.type == 'custom' %}
+                <span class="issue-badge custom" title="{{ 'Custom module - requires review'|t }}">👁️</span>
+              {% endif %}
+              {% if issue_count == 0 %}
+                <span class="no-issues">✅</span>
+              {% endif %}
+            </td>
+            
+            <td class="module-actions">
+              <div class="action-buttons">
+                {% if module.basic_info.type in ['custom', 'contrib'] %}
+                  <button class="btn btn-sm btn-primary scan-module" 
+                          data-module="{{ module_name }}" 
+                          title="{{ 'Scan for deprecated code'|t }}">
+                    🔍 {{ 'Scan'|t }}
+                  </button>
+                {% endif %}
+                
+                {% if module.project_info.project_url %}
+                  <a href="{{ module.project_info.project_url }}" 
+                     class="btn btn-sm btn-secondary" 
+                     target="_blank" 
+                     title="{{ 'View project page'|t }}">
+                    🔗 {{ 'Project'|t }}
+                  </a>
+                {% endif %}
+                
+                {% if module.project_info.issue_queue_url %}
+                  <a href="{{ module.project_info.issue_queue_url }}" 
+                     class="btn btn-sm btn-info" 
+                     target="_blank" 
+                     title="{{ 'View issue queue'|t }}">
+                    📝 {{ 'Issues'|t }}
+                  </a>
+                {% endif %}
+                
+                <button class="btn btn-sm btn-outline details-toggle" 
+                        data-module="{{ module_name }}" 
+                        title="{{ 'View details'|t }}">
+                  📜 {{ 'Details'|t }}
+                </button>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="module-details" id="details-{{ module_name }}" style="display: none;">
+            <td colspan="7">
+              <div class="details-content">
+                <div class="details-grid">
+                  <div class="detail-section">
+                    <h4>{{ 'Compatibility Information'|t }}</h4>
+                    <div class="compatibility-details">
+                      <p><strong>{{ 'D11 Status'|t }}:</strong> {{ module.compatibility.drupal_11_status.message }}</p>
+                      {% if module.compatibility.drupal_11_status.recommended_version %}
+                        <p><strong>{{ 'Recommended Version'|t }}:</strong> {{ module.compatibility.drupal_11_status.recommended_version }}</p>
+                      {% endif %}
+                      <p><strong>{{ 'PHP Compatibility'|t }}:</strong> 
+                        {% if module.compatibility.php_compatibility.compatible %}
+                          ✅ {{ 'Compatible'|t }} ({{ module.compatibility.php_compatibility.current_version }})
+                        {% else %}
+                          ❌ {{ 'Requires'|t }} {{ module.compatibility.php_compatibility.required_version }}+
+                        {% endif %}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div class="detail-section">
+                    <h4>{{ 'Update Information'|t }}</h4>
+                    <div class="update-details">
+                      <p><strong>{{ 'Current Version'|t }}:</strong> {{ module.update_info.current_version }}</p>
+                      {% if module.update_info.latest_version != 'Unknown' %}
+                        <p><strong>{{ 'Latest Version'|t }}:</strong> {{ module.update_info.latest_version }}</p>
+                      {% endif %}
+                      {% if module.update_info.security_update %}
+                        <p class="security-warning"><strong>🔒 {{ 'Security Update Available'|t }}</strong></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                  
+                  <div class="detail-section">
+                    <h4>{{ 'Risk Assessment'|t }}</h4>
+                    <div class="risk-details">
+                      <p><strong>{{ 'Risk Level'|t }}:</strong> 
+                        <span class="risk-{{ module.risk_assessment.overall_risk }}">
+                          {{ module.risk_assessment.overall_risk|capitalize }}
+                        </span>
+                      </p>
+                      {% if module.risk_assessment.risk_factors %}
+                        <p><strong>{{ 'Risk Factors'|t }}:</strong></p>
+                        <ul>
+                          {% for factor in module.risk_assessment.risk_factors %}
+                            <li>{{ factor }}</li>
+                          {% endfor %}
+                        </ul>
+                      {% endif %}
+                      {% if module.risk_assessment.recommendations %}
+                        <p><strong>{{ 'Recommendations'|t }}:</strong></p>
+                        <ul>
+                          {% for recommendation in module.risk_assessment.recommendations %}
+                            <li>{{ recommendation }}</li>
+                          {% endfor %}
+                        </ul>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="scan-results" id="scan-results-{{ module_name }}" style="display: none;">
+                  <h4>{{ 'Code Scan Results'|t }}</h4>
+                  <div class="scan-content">
+                    <!-- Scan results will be loaded here via AJAX -->
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="scan-progress" id="scan-progress" style="display: none;">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: 0%"></div>
+    </div>
+    <div class="progress-text">{{ 'Scanning modules...'|t }}</div>
+  </div>
+
+  <div class="report-footer">
+    <div class="legend">
+      <h4>{{ 'Legend'|t }}</h4>
+      <div class="legend-items">
+        <div class="legend-item">
+          <span class="compatibility-badge compatibility-ready">✅ {{ 'Ready'|t }}</span>
+          <span>{{ 'Module is compatible with Drupal 11'|t }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="compatibility-badge compatibility-needs_patch">🔧 {{ 'Needs Patch'|t }}</span>
+          <span>{{ 'Patch available for Drupal 11 compatibility'|t }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="compatibility-badge compatibility-not_ready">❌ {{ 'Not Ready'|t }}</span>
+          <span>{{ 'Module is not compatible with Drupal 11'|t }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="compatibility-badge compatibility-unknown">❓ {{ 'Unknown'|t }}</span>
+          <span>{{ 'Compatibility status unknown'|t }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="issue-badge security">🔒</span>
+          <span>{{ 'Security update available'|t }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="issue-badge high-risk">⚠️</span>
+          <span>{{ 'High risk module'|t }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="issue-badge custom">👁️</span>
+          <span>{{ 'Custom module requiring review'|t }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

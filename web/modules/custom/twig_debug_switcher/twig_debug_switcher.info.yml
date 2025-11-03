@@ -1,0 +1,8 @@
+name: 'Twig Debug Switcher'
+type: module
+description: 'Toggle Twig debug mode on/off from admin UI (dev-only).'
+core_version_requirement: ^10 || ^11
+package: Development
+dependencies:
+  - drupal:system
+configure: twig_debug_switcher.settings

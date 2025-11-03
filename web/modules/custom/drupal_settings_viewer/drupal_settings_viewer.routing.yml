@@ -1,0 +1,18 @@
+drupal_settings_viewer.settings_viewer:
+  path: '/admin/development/settings-viewer'
+  defaults:
+    _controller: '\Drupal\drupal_settings_viewer\Controller\SettingsViewerController::viewSettings'
+    _title: 'Drupal Settings Viewer'
+  requirements:
+    _permission: 'access drupal settings viewer'
+  options:
+    _admin_route: TRUE
+
+drupal_settings_viewer.settings_json:
+  path: '/admin/development/settings-viewer/json'
+  defaults:
+    _controller: '\Drupal\drupal_settings_viewer\Controller\SettingsViewerController::getSettingsJson'
+  requirements:
+    _permission: 'access drupal settings viewer'
+  options:
+    _admin_route: TRUE

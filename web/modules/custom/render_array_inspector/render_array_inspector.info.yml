@@ -1,0 +1,9 @@
+name: 'Render Array Inspector'
+type: module
+description: 'Toolbar panel showing the render array behind the current page output.'
+core_version_requirement: ^10 || ^11
+package: Development
+dependencies:
+  - drupal:toolbar
+  - drupal:system
+configure: render_array_inspector.settings

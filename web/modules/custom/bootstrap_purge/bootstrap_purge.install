@@ -1,0 +1,257 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Bootstrap Purge module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function bootstrap_purge_schema() {
+  $schema['bootstrap_purge_runtime_data'] = [
+    'description' => 'Stores runtime CSS/JS usage data for analysis.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique ID.',
+      ],
+      'route' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The route name where data was collected.',
+      ],
+      'selectors' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => TRUE,
+        'description' => 'JSON array of CSS selectors used.',
+      ],
+      'events' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+        'description' => 'JSON array of events triggered.',
+      ],
+      'duration' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Session duration in milliseconds.',
+      ],
+      'url' => [
+        'type' => 'varchar',
+        'length' => 512,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'The full URL where data was collected.',
+      ],
+      'viewport_width' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Viewport width in pixels.',
+      ],
+      'viewport_height' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Viewport height in pixels.',
+      ],
+      'user_agent' => [
+        'type' => 'varchar',
+        'length' => 512,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'User agent string.',
+      ],
+      'ip_address' => [
+        'type' => 'varchar',
+        'length' => 45,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Anonymized IP address.',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp when data was collected.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp when record was created.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'route' => ['route'],
+      'timestamp' => ['timestamp'],
+      'created' => ['created'],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function bootstrap_purge_install() {
+  // Set default storage directory
+  $file_system = \Drupal::service('file_system');
+  $storage_path = 'public://bootstrap_purge';
+  
+  if ($file_system->prepareDirectory($storage_path, \Drupal\Core\File\FileSystemInterface::CREATE_DIRECTORY)) {
+    \Drupal::messenger()->addStatus(t('Bootstrap Purge storage directory created at @path', [
+      '@path' => $storage_path,
+    ]));
+  }
+
+  \Drupal::messenger()->addStatus(t('Bootstrap Purge module has been installed. Visit the <a href="@url">configuration page</a> to get started.', [
+    '@url' => \Drupal\Core\Url::fromRoute('bootstrap_purge.settings')->toString(),
+  ]));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function bootstrap_purge_uninstall() {
+  // Clean up state variables
+  $state = \Drupal::state();
+  $state->delete('bootstrap_purge.pending_candidates');
+  $state->delete('bootstrap_purge.approved_purges');
+  $state->delete('bootstrap_purge.rejected_purges');
+  $state->delete('bootstrap_purge.asset_mappings');
+  $state->delete('bootstrap_purge.last_analysis');
+  $state->delete('bootstrap_purge.last_purge');
+  $state->delete('bootstrap_purge.last_cron_run');
+
+  // Optionally clean up purged files
+  $config = \Drupal::config('bootstrap_purge.settings');
+  $storage_path = $config->get('storage_path');
+  
+  if (!empty($storage_path)) {
+    $file_system = \Drupal::service('file_system');
+    if (is_dir($file_system->realpath($storage_path))) {
+      // Note: We don't automatically delete the directory as it might contain
+      // important files. Admin should manually clean up if needed.
+      \Drupal::messenger()->addWarning(t('Purged asset files in @path were not automatically deleted. You may want to clean them up manually.', [
+        '@path' => $storage_path,
+      ]));
+    }
+  }
+
+  \Drupal::messenger()->addStatus(t('Bootstrap Purge module has been uninstalled.'));
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function bootstrap_purge_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    $config = \Drupal::config('bootstrap_purge.settings');
+    
+    // Check if module is enabled
+    if ($config->get('enabled')) {
+      $requirements['bootstrap_purge_status'] = [
+        'title' => t('Bootstrap Purge'),
+        'value' => t('Enabled'),
+        'severity' => REQUIREMENT_OK,
+      ];
+
+      // Check storage directory
+      $storage_path = $config->get('storage_path');
+      $file_system = \Drupal::service('file_system');
+      
+      if (!$file_system->prepareDirectory($storage_path, \Drupal\Core\File\FileSystemInterface::CREATE_DIRECTORY)) {
+        $requirements['bootstrap_purge_storage'] = [
+          'title' => t('Bootstrap Purge Storage'),
+          'value' => t('Storage directory not writable'),
+          'description' => t('The storage directory @path is not writable. Purged assets cannot be saved.', [
+            '@path' => $storage_path,
+          ]),
+          'severity' => REQUIREMENT_ERROR,
+        ];
+      } else {
+        $requirements['bootstrap_purge_storage'] = [
+          'title' => t('Bootstrap Purge Storage'),
+          'value' => t('Storage directory writable'),
+          'severity' => REQUIREMENT_OK,
+        ];
+      }
+
+      // Check external tools
+      $purgecss_path = $config->get('purgecss_path');
+      if (!empty($purgecss_path)) {
+        try {
+          $process = new \Symfony\Component\Process\Process([$purgecss_path, '--version']);
+          $process->run();
+          if ($process->isSuccessful()) {
+            $requirements['bootstrap_purge_purgecss'] = [
+              'title' => t('Bootstrap Purge - PurgeCSS'),
+              'value' => t('Available'),
+              'severity' => REQUIREMENT_OK,
+            ];
+          } else {
+            $requirements['bootstrap_purge_purgecss'] = [
+              'title' => t('Bootstrap Purge - PurgeCSS'),
+              'value' => t('Not working'),
+              'description' => t('PurgeCSS is configured but not working properly. PHP-based purging will be used instead.'),
+              'severity' => REQUIREMENT_WARNING,
+            ];
+          }
+        } catch (\Exception $e) {
+          $requirements['bootstrap_purge_purgecss'] = [
+            'title' => t('Bootstrap Purge - PurgeCSS'),
+            'value' => t('Error'),
+            'description' => t('Error testing PurgeCSS: @error', ['@error' => $e->getMessage()]),
+            'severity' => REQUIREMENT_WARNING,
+          ];
+        }
+      }
+
+      // Check runtime data collection
+      if ($config->get('runtime_collection_enabled')) {
+        $database = \Drupal::database();
+        try {
+          $count = $database->select('bootstrap_purge_runtime_data')
+            ->countQuery()
+            ->execute()
+            ->fetchField();
+          
+          $requirements['bootstrap_purge_runtime'] = [
+            'title' => t('Bootstrap Purge - Runtime Data'),
+            'value' => t('@count records collected', ['@count' => $count]),
+            'severity' => REQUIREMENT_OK,
+          ];
+        } catch (\Exception $e) {
+          $requirements['bootstrap_purge_runtime'] = [
+            'title' => t('Bootstrap Purge - Runtime Data'),
+            'value' => t('Database error'),
+            'description' => t('Error accessing runtime data table: @error', ['@error' => $e->getMessage()]),
+            'severity' => REQUIREMENT_ERROR,
+          ];
+        }
+      }
+    } else {
+      $requirements['bootstrap_purge_status'] = [
+        'title' => t('Bootstrap Purge'),
+        'value' => t('Disabled'),
+        'description' => t('Bootstrap Purge is installed but not enabled. Visit the <a href="@url">configuration page</a> to enable it.', [
+          '@url' => \Drupal\Core\Url::fromRoute('bootstrap_purge.settings')->toString(),
+        ]),
+        'severity' => REQUIREMENT_INFO,
+      ];
+    }
+  }
+
+  return $requirements;
+}

@@ -1,0 +1,18 @@
+{#
+/**
+ * @file
+ * Template for the Drupal Settings Viewer page.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the containing element.
+ */
+#}
+<div{{ attributes.addClass('drupal-settings-viewer-page') }}>
+  <div class="drupal-settings-viewer-wrapper">
+    <div id="drupal-settings-viewer-container" class="settings-viewer-container">
+      <div class="loading-message">
+        <p>{{ 'Loading drupalSettings...'|t }}</p>
+      </div>
+    </div>
+  </div>
+</div>

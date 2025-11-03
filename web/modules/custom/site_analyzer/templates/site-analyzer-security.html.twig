@@ -1,0 +1,643 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer Security Analysis page.
+ *
+ * Available variables:
+ * - security_data: Array containing security analysis data
+ */
+#}
+
+<div class="site-analyzer-security">
+  <div class="unified-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">🔒</span>
+        {{ 'Security Analysis'|t }}
+      </h1>
+      <p class="page-description">
+        {{ 'Comprehensive security assessment and vulnerability analysis'|t }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary refresh-btn" onclick="refreshSecurityAnalysis()">
+        <span class="btn-icon">🔄</span>
+        {{ 'Refresh Analysis'|t }}
+      </button>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {% if security_data %}
+    <div class="security-analysis-content">
+      
+      {# Security Updates #}
+      {% if security_data.security_updates %}
+        <div class="analysis-section security-updates">
+          <h2>{{ 'Security Updates'|t }}</h2>
+          {% if security_data.security_updates|length > 0 %}
+            <div class="alert alert-error">
+              <strong>{{ 'Critical:'|t }}</strong> {{ security_data.security_updates|length }} {{ 'security updates available'|t }}
+            </div>
+            <div class="security-updates-list">
+              {% for update in security_data.security_updates %}
+                <div class="security-update-item severity-{{ update.severity }}">
+                  <h4>{{ update.module }}</h4>
+                  <p><strong>{{ 'Current:'|t }}</strong> {{ update.current_version }}</p>
+                  <p><strong>{{ 'Security Version:'|t }}</strong> {{ update.security_version }}</p>
+                  <p><strong>{{ 'Severity:'|t }}</strong> <span class="severity-{{ update.severity }}">{{ update.severity|title }}</span></p>
+                  <p>{{ update.description }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-success">
+              <strong>{{ 'Good:'|t }}</strong> {{ 'No security updates required'|t }}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Permission Audit #}
+      {% if security_data.permission_audit %}
+        <div class="analysis-section permission-audit">
+          <h2>{{ 'Permission Audit'|t }}</h2>
+          
+          {% if security_data.permission_audit.risky_permissions %}
+            <div class="risky-permissions">
+              <h3>{{ 'Risky Permissions'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Role'|t }}</th>
+                    <th>{{ 'Permission'|t }}</th>
+                    <th>{{ 'Risk Level'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for permission in security_data.permission_audit.risky_permissions %}
+                    <tr class="risk-{{ permission.risk_level }}">
+                      <td>{{ permission.role }}</td>
+                      <td>{{ permission.permission }}</td>
+                      <td><span class="risk-badge risk-{{ permission.risk_level }}">{{ permission.risk_level|title }}</span></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+
+          {% if security_data.permission_audit.role_analysis %}
+            <div class="role-analysis">
+              <h3>{{ 'Role Analysis'|t }}</h3>
+              <div class="roles-grid">
+                {% for role_id, role_info in security_data.permission_audit.role_analysis %}
+                  <div class="role-card risk-score-{{ role_info.risk_score }}">
+                    <h4>{{ role_info.label }}</h4>
+                    <p><strong>{{ 'Permissions:'|t }}</strong> {{ role_info.permission_count }}</p>
+                    <p><strong>{{ 'Risky Permissions:'|t }}</strong> {{ role_info.risky_permissions|length }}</p>
+                    <p><strong>{{ 'Risk Score:'|t }}</strong> {{ role_info.risk_score }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Menu Router Security (Site Audit Integration) #}
+      {% if security_data.menu_router_security %}
+        <div class="analysis-section menu-router-security">
+          <h2>{{ 'Menu Router Security'|t }}</h2>
+          {% if security_data.menu_router_security.status == 'pass' %}
+            <div class="alert alert-success">
+              <strong>{{ 'Good:'|t }}</strong> {{ 'No malicious routes detected'|t }}
+            </div>
+          {% else %}
+            <div class="alert alert-error">
+              <strong>{{ 'Critical:'|t }}</strong> {{ 'Potentially malicious routes detected'|t }}
+            </div>
+            {% if security_data.menu_router_security.malicious_routes %}
+              <div class="malicious-routes">
+                <h3>{{ 'Malicious Routes'|t }}</h3>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>{{ 'Route'|t }}</th>
+                      <th>{{ 'Path'|t }}</th>
+                      <th>{{ 'Dangerous Function'|t }}</th>
+                      <th>{{ 'Description'|t }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for route in security_data.menu_router_security.malicious_routes %}
+                      <tr class="malicious-route">
+                        <td>{{ route.route }}</td>
+                        <td>{{ route.path }}</td>
+                        <td><code>{{ route.dangerous_function }}</code></td>
+                        <td>{{ route.description }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Malicious Code Scan (Site Audit Integration) #}
+      {% if security_data.malicious_code_scan %}
+        <div class="analysis-section malicious-code-scan">
+          <h2>{{ 'Malicious Code Scan'|t }}</h2>
+          <p><strong>{{ 'Files Scanned:'|t }}</strong> {{ security_data.malicious_code_scan.files_scanned }}</p>
+          
+          {% if security_data.malicious_code_scan.suspicious_files %}
+            <div class="alert alert-warning">
+              <strong>{{ 'Warning:'|t }}</strong> {{ security_data.malicious_code_scan.suspicious_files|length }} {{ 'suspicious files detected'|t }}
+            </div>
+            <div class="suspicious-files">
+              <h3>{{ 'Suspicious Files'|t }}</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{{ 'File'|t }}</th>
+                    <th>{{ 'Pattern'|t }}</th>
+                    <th>{{ 'Description'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for file in security_data.malicious_code_scan.suspicious_files %}
+                    <tr>
+                      <td><code>{{ file.file }}</code></td>
+                      <td><code>{{ file.pattern }}</code></td>
+                      <td>{{ file.description }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="alert alert-success">
+              <strong>{{ 'Good:'|t }}</strong> {{ 'No suspicious code patterns detected'|t }}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# File Permissions #}
+      {% if security_data.file_permissions %}
+        <div class="analysis-section file-permissions">
+          <h2>{{ 'File Permissions'|t }}</h2>
+          
+          {% if security_data.file_permissions.settings_file %}
+            <div class="settings-file-check">
+              <h3>{{ 'Settings File'|t }}</h3>
+              {% for issue in security_data.file_permissions.settings_file %}
+                <div class="alert alert-{{ issue.type }}">
+                  {{ issue.message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if security_data.file_permissions.files_directory %}
+            <div class="files-directory-check">
+              <h3>{{ 'Files Directory'|t }}</h3>
+              {% for issue in security_data.file_permissions.files_directory %}
+                <div class="alert alert-{{ issue.type }}">
+                  {{ issue.message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# SSL Configuration #}
+      {% if security_data.ssl_configuration %}
+        <div class="analysis-section ssl-configuration">
+          <h2>{{ 'SSL Configuration'|t }}</h2>
+          <div class="ssl-checks">
+            <div class="ssl-check">
+              <strong>{{ 'HTTPS Enabled:'|t }}</strong> 
+              <span class="status-{{ security_data.ssl_configuration.https_enabled ? 'pass' : 'fail' }}">
+                {{ security_data.ssl_configuration.https_enabled ? 'Yes'|t : 'No'|t }}
+              </span>
+            </div>
+            <div class="ssl-check">
+              <strong>{{ 'HSTS Header:'|t }}</strong> 
+              <span class="status-{{ security_data.ssl_configuration.hsts_header ? 'pass' : 'warn' }}">
+                {{ security_data.ssl_configuration.hsts_header ? 'Enabled'|t : 'Disabled'|t }}
+              </span>
+            </div>
+            <div class="ssl-check">
+              <strong>{{ 'Secure Cookies:'|t }}</strong>
+              <ul>
+                <li>{{ 'Cookie Secure:'|t }} {{ security_data.ssl_configuration.secure_cookies.cookie_secure ? 'Yes'|t : 'No'|t }}</li>
+                <li>{{ 'Cookie HttpOnly:'|t }} {{ security_data.ssl_configuration.secure_cookies.cookie_httponly ? 'Yes'|t : 'No'|t }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# Security Modules #}
+      {% if security_data.security_modules %}
+        <div class="analysis-section security-modules">
+          <h2>{{ 'Security Modules'|t }}</h2>
+          
+          {% if security_data.security_modules.installed %}
+            <div class="installed-security-modules">
+              <h3>{{ 'Installed Security Modules'|t }}</h3>
+              <ul>
+                {% for module, description in security_data.security_modules.installed %}
+                  <li><strong>{{ module }}:</strong> {{ description }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          {% if security_data.security_modules.recommended %}
+            <div class="recommended-security-modules">
+              <h3>{{ 'Recommended Security Modules'|t }}</h3>
+              <ul>
+                {% for module, description in security_data.security_modules.recommended %}
+                  <li><strong>{{ module }}:</strong> {{ description }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Site Audit Security Recommendations #}
+      {% if security_data.site_audit_security_recommendations %}
+        <div class="analysis-section security-recommendations">
+          <h2>{{ 'Security Recommendations'|t }}</h2>
+          <div class="recommendations-list">
+            {% for recommendation in security_data.site_audit_security_recommendations %}
+              <div class="recommendation recommendation-{{ recommendation.type }} priority-{{ recommendation.priority }}">
+                <div class="recommendation-header">
+                  <span class="recommendation-type">{{ recommendation.type|title }}</span>
+                  <span class="recommendation-priority">{{ recommendation.priority|title }}</span>
+                </div>
+                <div class="recommendation-message">{{ recommendation.message }}</div>
+                <div class="recommendation-category">{{ 'Category:'|t }} {{ recommendation.category }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      {{ 'Security analysis data is not available. Please check the security analyzer service.'|t }}
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.site-analyzer-security {
+  padding: 20px;
+}
+
+.unified-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px 0;
+  font-size: 2.2em;
+  font-weight: 600;
+  color: #333;
+}
+
+.title-icon {
+  margin-right: 12px;
+  font-size: 1.1em;
+}
+
+.page-description {
+  margin: 0;
+  font-size: 1.1em;
+  color: #666;
+  line-height: 1.4;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #0073aa;
+  color: white;
+  border-color: #0073aa;
+}
+
+.btn-primary:hover {
+  background-color: #005a87;
+  border-color: #005a87;
+}
+
+.btn-secondary {
+  background-color: #f7f7f7;
+  color: #333;
+  border-color: #ccc;
+}
+
+.btn-secondary:hover {
+  background-color: #e7e7e7;
+  border-color: #bbb;
+}
+
+.btn-icon {
+  margin-right: 6px;
+  font-size: 0.9em;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  min-width: 180px;
+  z-index: 1000;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 8px 12px;
+  color: #333;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-arrow {
+  margin-left: 6px;
+  font-size: 0.8em;
+}
+
+.analysis-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+
+.analysis-section h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.alert-success {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+}
+
+.alert-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+}
+
+.alert-error {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.table th,
+.table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.severity-critical,
+.risk-critical {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+.severity-moderate,
+.risk-high {
+  color: #f0ad4e;
+  font-weight: bold;
+}
+
+.risk-medium {
+  color: #5bc0de;
+}
+
+.risk-low {
+  color: #5cb85c;
+}
+
+.risk-badge {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.risk-badge.risk-critical {
+  background-color: #d9534f;
+  color: white;
+}
+
+.risk-badge.risk-high {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.risk-badge.risk-medium {
+  background-color: #5bc0de;
+  color: white;
+}
+
+.risk-badge.risk-low {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.role-card {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+}
+
+.status-pass {
+  color: #5cb85c;
+  font-weight: bold;
+}
+
+.status-fail {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+.status-warn {
+  color: #f0ad4e;
+  font-weight: bold;
+}
+
+.recommendations-list {
+  margin-top: 15px;
+}
+
+.recommendation {
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid #ddd;
+  background: white;
+  border-radius: 0 5px 5px 0;
+}
+
+.recommendation-error {
+  border-left-color: #d9534f;
+}
+
+.recommendation-warning {
+  border-left-color: #f0ad4e;
+}
+
+.recommendation-info {
+  border-left-color: #5bc0de;
+}
+
+.recommendation-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.recommendation-type {
+  text-transform: uppercase;
+  font-size: 0.85em;
+}
+
+.recommendation-priority {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.recommendation-category {
+  margin-top: 10px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+</style>
+
+<script>
+function refreshSecurityAnalysis() {
+  // Show loading state
+  const button = document.querySelector('.refresh-btn');
+  const originalText = button.innerHTML;
+  button.innerHTML = '<span class="btn-icon">⏳</span>' + Drupal.t('Refreshing...');
+  button.disabled = true;
+  
+  // Reload the current page
+  window.location.reload();
+}
+</script>

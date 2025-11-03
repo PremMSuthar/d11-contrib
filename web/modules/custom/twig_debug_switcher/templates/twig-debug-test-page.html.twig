@@ -1,0 +1,83 @@
+{#
+/**
+ * @file
+ * Template for Twig debug test page.
+ */
+#}
+
+<div class="twig-debug-test-page">
+  <h2>{{ 'Twig Debug Status Test'|t }}</h2>
+  
+  <div class="status-summary">
+    <h3>{{ 'Current Status'|t }}</h3>
+    <p><strong>{{ 'Overall Status:'|t }}</strong> 
+      <span class="status-{{ current_status ? 'enabled' : 'disabled' }}">
+        {{ current_status ? 'Enabled'|t : 'Disabled'|t }}
+      </span>
+    </p>
+    <p><strong>{{ 'Module Configuration:'|t }}</strong> 
+      <span class="status-{{ module_debug ? 'enabled' : 'disabled' }}">
+        {{ module_debug ? 'Enabled'|t : 'Disabled'|t }}
+      </span>
+    </p>
+  </div>
+
+  {% if twig_details %}
+    <div class="twig-environment-details">
+      <h3>{{ 'Twig Environment Details'|t }}</h3>
+      <ul>
+        {% if twig_details.debug is defined %}
+          <li><strong>{{ 'Debug:'|t }}</strong> {{ twig_details.debug ? 'True'|t : 'False'|t }}</li>
+        {% endif %}
+        {% if twig_details.auto_reload is defined %}
+          <li><strong>{{ 'Auto Reload:'|t }}</strong> {{ twig_details.auto_reload ? 'True'|t : 'False'|t }}</li>
+        {% endif %}
+        {% if twig_details.cache is defined %}
+          <li><strong>{{ 'Cache:'|t }}</strong> {{ twig_details.cache }}</li>
+        {% endif %}
+        {% if twig_details.error is defined %}
+          <li><strong>{{ 'Error:'|t }}</strong> {{ twig_details.error }}</li>
+        {% endif %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div class="debug-test">
+    <h3>{{ 'Debug Test'|t }}</h3>
+    <p>{{ 'If Twig debug is enabled, you should see HTML comments in the page source showing template information.'|t }}</p>
+    <div class="test-template">
+      <!-- This is a test template section -->
+      <p>{{ 'This is a test template to verify Twig debug functionality.'|t }}</p>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a href="{{ path('twig_debug_switcher.settings') }}" class="button">{{ 'Back to Settings'|t }}</a>
+  </div>
+</div>
+
+<style>
+.status-enabled {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-disabled {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.twig-debug-test-page .status-summary,
+.twig-debug-test-page .twig-environment-details,
+.twig-debug-test-page .debug-test {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  background-color: #f8f9fa;
+}
+
+.twig-debug-test-page .actions {
+  margin-top: 2rem;
+}
+</style>

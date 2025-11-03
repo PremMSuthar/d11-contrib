@@ -1,0 +1,34 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer navigation.
+ *
+ * Available variables:
+ * - navigation_items: Array of navigation items
+ * - current_page: Current page key
+ * - breadcrumbs: Breadcrumb items
+ */
+#}
+
+<div class="site-analyzer-navigation">
+  <div class="navigation-container">
+    <nav class="navigation-menu" role="navigation" aria-label="{{ 'Site Analyzer Navigation'|t }}">
+      <ul class="nav-list">
+        {% for key, item in navigation_items %}
+          <li class="nav-item {{ current_page == key ? 'nav-item--active' : '' }}">
+            <a href="{{ item.url }}" 
+               class="nav-link {{ current_page == key ? 'nav-link--active' : '' }}"
+               title="{{ item.description }}"
+               {% if current_page == key %}aria-current="page"{% endif %}>
+              <span class="nav-icon">{{ item.icon }}</span>
+              <span class="nav-text">{{ item.title }}</span>
+              {% if current_page == key %}
+                <span class="nav-indicator" aria-hidden="true"></span>
+              {% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+</div>

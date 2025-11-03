@@ -1,0 +1,330 @@
+{#
+/**
+ * @file
+ * Template for unified Module & Theme analysis.
+ *
+ * Available variables:
+ * - unified_data: Array of unified module and theme data
+ * - module_data: Raw module analysis data
+ * - theme_data: Raw theme analysis data
+ * - summary_stats: Summary statistics
+ */
+#}
+
+<div class="site-analyzer-unified-extensions">
+  <div class="unified-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">🧩</span>
+        {{ 'Extensions Analysis'|t }}
+      </h1>
+      <p class="page-description">
+        {{ 'Comprehensive analysis of modules and themes for Drupal 11 readiness and compatibility.'|t }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary scan-all-btn" data-scan-type="all">
+        <span class="btn-icon">🔍</span>
+        {{ 'Scan All'|t }}
+      </button>
+      <div class="dropdown export-dropdown">
+        <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+          <span class="btn-icon">📊</span>
+          {{ 'Export'|t }}
+        </button>
+        <div class="dropdown-menu">
+          <a href="#" class="dropdown-item export-btn" data-format="json">{{ 'Export as JSON'|t }}</a>
+          <a href="#" class="dropdown-item export-btn" data-format="csv">{{ 'Export as CSV'|t }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {# Summary Statistics Cards #}
+  <div class="summary-cards">
+    <div class="summary-card total-card">
+      <div class="card-icon">📦</div>
+      <div class="card-content">
+        <div class="card-number">{{ summary_stats.total_items|default(0) }}</div>
+        <div class="card-label">{{ 'Total Extensions'|t }}</div>
+        <div class="card-breakdown">
+          <span class="breakdown-item">{{ summary_stats.modules_count|default(0) }} {{ 'Modules'|t }}</span>
+          <span class="breakdown-item">{{ summary_stats.themes_count|default(0) }} {{ 'Themes'|t }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card readiness-card">
+      <div class="card-icon">🚀</div>
+      <div class="card-content">
+        <div class="card-number">{{ summary_stats.drupal_11_ready|default(0) }}</div>
+        <div class="card-label">{{ 'Drupal 11 Ready'|t }}</div>
+        <div class="card-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ (summary_stats.total_items|default(0)) > 0 ? ((summary_stats.drupal_11_ready|default(0)) / (summary_stats.total_items|default(1)) * 100)|round : 0 }}%"></div>
+          </div>
+          <span class="progress-text">{{ (summary_stats.total_items|default(0)) > 0 ? ((summary_stats.drupal_11_ready|default(0)) / (summary_stats.total_items|default(1)) * 100)|round : 0 }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card issues-card">
+      <div class="card-icon">⚠️</div>
+      <div class="card-content">
+        <div class="card-number">{{ summary_stats.needs_attention|default(0) }}</div>
+        <div class="card-label">{{ 'Need Attention'|t }}</div>
+        <div class="card-breakdown">
+          {% if (summary_stats.security_updates|default(0)) > 0 %}
+            <span class="breakdown-item critical">{{ summary_stats.security_updates|default(0) }} {{ 'Security Updates'|t }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card score-card">
+      <div class="card-icon">📊</div>
+      <div class="card-content">
+        <div class="card-number">{{ summary_stats.avg_readiness_score|default(0) }}%</div>
+        <div class="card-label">{{ 'Avg Readiness Score'|t }}</div>
+        <div class="card-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ summary_stats.avg_readiness_score|default(0) }}%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Filter and Search Bar #}
+  <div class="filter-bar">
+    <div class="filter-section">
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="{{ 'Search extensions...'|t }}" id="extension-search">
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+    
+    <div class="filter-section">
+      <select class="filter-select" id="type-filter">
+        <option value="all">{{ 'All Types'|t }}</option>
+        <option value="module">{{ 'Modules Only'|t }}</option>
+        <option value="theme">{{ 'Themes Only'|t }}</option>
+      </select>
+      
+      <select class="filter-select" id="status-filter">
+        <option value="all">{{ 'All Status'|t }}</option>
+        <option value="enabled">{{ 'Enabled'|t }}</option>
+        <option value="disabled">{{ 'Disabled'|t }}</option>
+      </select>
+      
+      <select class="filter-select" id="category-filter">
+        <option value="all">{{ 'All Categories'|t }}</option>
+        <option value="core">{{ 'Core'|t }}</option>
+        <option value="contrib">{{ 'Contributed'|t }}</option>
+        <option value="custom">{{ 'Custom'|t }}</option>
+      </select>
+      
+      <select class="filter-select" id="readiness-filter">
+        <option value="all">{{ 'All Readiness'|t }}</option>
+        <option value="ready">{{ 'Drupal 11 Ready'|t }}</option>
+        <option value="needs-work">{{ 'Needs Work'|t }}</option>
+        <option value="issues">{{ 'Has Issues'|t }}</option>
+      </select>
+    </div>
+    
+    <div class="filter-section">
+      <button class="btn btn-outline clear-filters-btn">{{ 'Clear Filters'|t }}</button>
+    </div>
+  </div>
+
+  {# Bulk Actions Bar #}
+  <div class="bulk-actions-bar" style="display: none;">
+    <div class="bulk-info">
+      <span class="selected-count">0</span> {{ 'items selected'|t }}
+    </div>
+    <div class="bulk-buttons">
+      <button class="btn btn-primary bulk-scan-btn">{{ 'Scan Selected'|t }}</button>
+      <button class="btn btn-secondary bulk-export-btn">{{ 'Export Selected'|t }}</button>
+      <button class="btn btn-outline bulk-clear-btn">{{ 'Clear Selection'|t }}</button>
+    </div>
+  </div>
+
+  {# Extensions Table #}
+  <div class="extensions-table-container">
+    <table class="extensions-table" id="extensions-table">
+      <thead>
+        <tr>
+          <th class="select-column">
+            <input type="checkbox" id="select-all" class="select-all-checkbox">
+          </th>
+          <th class="sortable" data-sort="display_name">
+            {{ 'Name'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="type">
+            {{ 'Type'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="status">
+            {{ 'Status'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="version">
+            {{ 'Version'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="readiness_score">
+            {{ 'D11 Readiness'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="sortable" data-sort="issues_count">
+            {{ 'Issues'|t }}
+            <span class="sort-indicator"></span>
+          </th>
+          <th class="actions-column">
+            {{ 'Actions'|t }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if unified_data is defined and unified_data is not empty %}
+        {% for item in unified_data %}
+          <tr class="extension-row" 
+              data-name="{{ item.name }}" 
+              data-type="{{ item.type }}" 
+              data-status="{{ item.status }}" 
+              data-category="{{ item.category }}"
+              data-readiness="{{ item.drupal_11_ready ? 'ready' : (item.issues_count > 0 ? 'issues' : 'needs-work') }}">
+            <td class="select-column">
+              <input type="checkbox" class="row-checkbox" value="{{ item.name }}">
+            </td>
+            <td class="name-column">
+              <div class="extension-info">
+                <div class="extension-name">
+                  <span class="type-icon">{{ item.type == 'module' ? '🧩' : '🎨' }}</span>
+                  <strong>{{ item.display_name }}</strong>
+                  {% if item.category == 'custom' %}
+                    <span class="badge badge-custom">{{ 'Custom'|t }}</span>
+                  {% elseif item.category == 'core' %}
+                    <span class="badge badge-core">{{ 'Core'|t }}</span>
+                  {% endif %}
+                </div>
+                {% if item.description %}
+                  <div class="extension-description">{{ item.description|length > 80 ? item.description|slice(0, 80) ~ '...' : item.description }}</div>
+                {% endif %}
+                {% if item.package and item.package != 'Other' %}
+                  <div class="extension-package">{{ item.package }}</div>
+                {% endif %}
+              </div>
+            </td>
+            <td class="type-column">
+              <span class="type-badge type-{{ item.type }}">
+                {{ item.type|title }}
+              </span>
+            </td>
+            <td class="status-column">
+              <span class="status-badge status-{{ item.status }}">
+                {{ item.status|title }}
+              </span>
+            </td>
+            <td class="version-column">
+              <span class="version-text">{{ item.version }}</span>
+              {% if item.core_compatibility %}
+                <div class="core-compat">{{ item.core_compatibility }}</div>
+              {% endif %}
+            </td>
+            <td class="readiness-column">
+              <div class="readiness-indicator">
+                <div class="readiness-score">
+                  <div class="score-circle score-{{ item.readiness_score >= 80 ? 'high' : (item.readiness_score >= 60 ? 'medium' : 'low') }}">
+                    {{ item.readiness_score }}%
+                  </div>
+                </div>
+                <div class="readiness-status">
+                  {% if item.drupal_11_ready %}
+                    <span class="status-ready">✅ {{ 'Ready'|t }}</span>
+                  {% elseif item.issues_count > 0 %}
+                    <span class="status-issues">⚠️ {{ 'Issues'|t }}</span>
+                  {% else %}
+                    <span class="status-needs-work">🔧 {{ 'Needs Work'|t }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td class="issues-column">
+              {% if item.issues_count > 0 %}
+                <span class="issues-count issues-{{ item.issues_count > 5 ? 'high' : (item.issues_count > 2 ? 'medium' : 'low') }}">
+                  {{ item.issues_count }}
+                </span>
+              {% else %}
+                <span class="issues-none">—</span>
+              {% endif %}
+              {% if item.security_updates > 0 %}
+                <span class="security-alert">🔒 {{ item.security_updates }}</span>
+              {% endif %}
+            </td>
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-primary scan-btn" data-name="{{ item.name }}" data-type="{{ item.type }}">
+                  <span class="btn-icon">🔍</span>
+                  {{ 'Scan'|t }}
+                </button>
+                <button class="btn btn-sm btn-outline details-btn" data-name="{{ item.name }}" data-type="{{ item.type }}">
+                  <span class="btn-icon">📋</span>
+                  {{ 'Details'|t }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="text-center">
+              <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <div class="empty-message">{{ 'No extensions found. This might indicate an issue with the analysis.'|t }}</div>
+                <div class="empty-action">
+                  <button class="btn btn-primary scan-all-btn" data-scan-type="all">
+                    {{ 'Run Analysis'|t }}
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Loading Overlay #}
+  <div class="loading-overlay" style="display: none;">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div class="loading-text">{{ 'Analyzing extensions...'|t }}</div>
+    </div>
+  </div>
+
+  {# Results Modal #}
+  <div class="modal" id="results-modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">{{ 'Analysis Results'|t }}</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-results"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close">{{ 'Close'|t }}</button>
+      </div>
+    </div>
+  </div>
+</div>

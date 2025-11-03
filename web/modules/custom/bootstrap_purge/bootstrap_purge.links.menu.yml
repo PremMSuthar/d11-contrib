@@ -1,0 +1,6 @@
+bootstrap_purge.settings:
+  title: 'Bootstrap Purge'
+  description: 'Configure Bootstrap Purge settings and manage asset optimization.'
+  route_name: bootstrap_purge.settings
+  parent: system.admin_config_development
+  weight: 10

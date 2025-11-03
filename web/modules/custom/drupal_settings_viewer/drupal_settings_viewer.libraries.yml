@@ -1,0 +1,17 @@
+settings_viewer:
+  version: 1.x
+  js:
+    js/settings-viewer.js: {}
+  css:
+    theme:
+      css/toolbar-icon.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+
+toolbar_icon:
+  version: 1.x
+  css:
+    theme:
+      css/toolbar-icon.css: {}

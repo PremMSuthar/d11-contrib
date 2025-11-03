@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Analyzer Content Analysis - Test</title>
+    <link rel="stylesheet" href="css/analyzer.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="site-analyzer-content-report">
+        <div class="report-header">
+            <h1>Comprehensive Content Analysis Report</h1>
+            <div class="report-summary">
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Content Types</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">1,234</span>
+                        <span class="stat-label">Total Nodes</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">567</span>
+                        <span class="stat-label">Media Files</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Vocabularies</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-actions">
+            <button class="btn btn-primary export-content-report" data-format="json">
+                📄 Export Full Report (JSON)
+            </button>
+            <button class="btn btn-secondary export-content-report" data-format="csv">
+                📊 Export Summary (CSV)
+            </button>
+            <button class="btn btn-info generate-migration-plan">
+                🚀 Generate Migration Plan
+            </button>
+        </div>
+
+        <div class="content-tabs">
+            <div class="tab-nav">
+                <button class="tab-button active" data-tab="overview">📊 Overview</button>
+                <button class="tab-button" data-tab="content-types">📝 Content Types</button>
+                <button class="tab-button" data-tab="media">🖼️ Media & Files</button>
+                <button class="tab-button" data-tab="taxonomy">🏷️ Taxonomy</button>
+                <button class="tab-button" data-tab="relationships">🔗 Relationships</button>
+                <button class="tab-button" data-tab="migration">🚀 Migration Guide</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="overview">
+                <div class="overview-grid">
+                    <div class="overview-card">
+                        <h3>Content Volume</h3>
+                        <div class="volume-chart">
+                            <div class="volume-item">
+                                <span class="volume-label">Articles</span>
+                                <span class="volume-count">800</span>
+                                <div class="volume-bar">
+                                    <div class="volume-fill" style="width: 65%"></div>
+                                </div>
+                            </div>
+                            <div class="volume-item">
+                                <span class="volume-label">Pages</span>
+                                <span class="volume-count">234</span>
+                                <div class="volume-bar">
+                                    <div class="volume-fill" style="width: 19%"></div>
+                                </div>
+                            </div>
+                            <div class="volume-item">
+                                <span class="volume-label">Events</span>
+                                <span class="volume-count">200</span>
+                                <div class="volume-bar">
+                                    <div class="volume-fill" style="width: 16%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>Storage Usage</h3>
+                        <div class="storage-info">
+                            <div class="storage-item">
+                                <span class="storage-label">Total Media Size</span>
+                                <span class="storage-size">2.34 GB</span>
+                            </div>
+                            <div class="storage-item">
+                                <span class="storage-label">PUBLIC://</span>
+                                <span class="storage-size">450 files (1.8 GB)</span>
+                            </div>
+                            <div class="storage-item">
+                                <span class="storage-label">PRIVATE://</span>
+                                <span class="storage-size">117 files (540 MB)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>Field Types Usage</h3>
+                        <div class="field-types-chart">
+                            <div class="field-type-item">
+                                <span class="field-type-name">Text (Plain)</span>
+                                <div>
+                                    <span class="field-type-count">45</span>
+                                </div>
+                            </div>
+                            <div class="field-type-item">
+                                <span class="field-type-name">Entity Reference</span>
+                                <div>
+                                    <span class="field-type-count">23</span>
+                                </div>
+                            </div>
+                            <div class="field-type-item">
+                                <span class="field-type-name">Image</span>
+                                <div>
+                                    <span class="field-type-count">18</span>
+                                </div>
+                            </div>
+                            <div class="field-type-item">
+                                <span class="field-type-name">Text (Formatted)</span>
+                                <div>
+                                    <span class="field-type-count">12</span>
+                                    <span class="deprecated-badge">⚠️ Deprecated</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>Content Health</h3>
+                        <div class="health-indicators">
+                            <div class="health-item">
+                                <span class="health-label">Deprecated Fields</span>
+                                <span class="health-value warning">3</span>
+                            </div>
+                            <div class="health-item">
+                                <span class="health-label">Recent Content</span>
+                                <span class="health-value good">156</span>
+                            </div>
+                            <div class="health-item">
+                                <span class="health-label">Media Types</span>
+                                <span class="health-value good">4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Migration Guide Tab -->
+            <div class="tab-content" id="migration">
+                <div class="migration-guide">
+                    <h3>Migration & Upgrade Guide</h3>
+                    
+                    <div class="migration-sections">
+                        <div class="migration-section">
+                            <h4>Content Migration Checklist</h4>
+                            <div class="checklist">
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="backup-content">
+                                    <label for="backup-content">Backup all content and media files</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="audit-fields">
+                                    <label for="audit-fields">Audit custom fields for compatibility</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="test-media">
+                                    <label for="test-media">Test media file accessibility</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="review-taxonomy">
+                                    <label for="review-taxonomy">Review taxonomy structure</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="validate-relationships">
+                                    <label for="validate-relationships">Validate entity relationships</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="migration-section">
+                            <h4>Potential Issues</h4>
+                            <div class="issues-list">
+                                <div class="issue-item warning">
+                                    <span class="issue-icon">⚠️</span>
+                                    <span class="issue-text">Deprecated field types detected: 3</span>
+                                </div>
+                                <div class="issue-item info">
+                                    <span class="issue-icon">ℹ️</span>
+                                    <span class="issue-text">Large content volume (1,234 nodes) - consider batch migration</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other tabs would be here in the real implementation -->
+            <div class="tab-content" id="content-types">
+                <h3>Content Types Analysis</h3>
+                <p>Content types analysis would be displayed here...</p>
+            </div>
+
+            <div class="tab-content" id="media">
+                <h3>Media & Files Analysis</h3>
+                <p>Media analysis would be displayed here...</p>
+            </div>
+
+            <div class="tab-content" id="taxonomy">
+                <h3>Taxonomy Analysis</h3>
+                <p>Taxonomy analysis would be displayed here...</p>
+            </div>
+
+            <div class="tab-content" id="relationships">
+                <h3>Content Relationships</h3>
+                <p>Relationship diagram would be displayed here...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulate Drupal's JavaScript structure -->
+    <script>
+        // Mock Drupal object for testing
+        var Drupal = Drupal || {};
+        Drupal.behaviors = Drupal.behaviors || {};
+        Drupal.siteAnalyzer = Drupal.siteAnalyzer || {};
+
+        // Mock once function
+        function once(id, selector, context) {
+            return $(selector, context).toArray();
+        }
+
+        // Load the content analysis JavaScript
+        $.getScript('js/content-analysis.js').done(function() {
+            // Initialize the content analysis
+            Drupal.behaviors.siteAnalyzerContentAnalysis.attach(document, {});
+        });
+
+        // Mock notification function
+        Drupal.siteAnalyzer.showNotification = function(message, type) {
+            alert(type.toUpperCase() + ': ' + message);
+        };
+    </script>
+</body>
+</html>

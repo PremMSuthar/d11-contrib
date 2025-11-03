@@ -1,0 +1,24 @@
+services:
+  bootstrap_purge.asset_collector:
+    class: Drupal\bootstrap_purge\Service\AssetCollector
+    arguments: ['@module_handler', '@theme_handler', '@file_system', '@logger.factory']
+
+  bootstrap_purge.analyzer:
+    class: Drupal\bootstrap_purge\Service\AssetAnalyzer
+    arguments: ['@bootstrap_purge.asset_collector', '@config.factory', '@file_system', '@logger.factory']
+
+  bootstrap_purge.purger:
+    class: Drupal\bootstrap_purge\Service\AssetPurger
+    arguments: ['@config.factory', '@file_system', '@file.repository', '@logger.factory']
+
+  bootstrap_purge.asset_manager:
+    class: Drupal\bootstrap_purge\Service\AssetManager
+    arguments: ['@bootstrap_purge.asset_collector', '@bootstrap_purge.analyzer', '@bootstrap_purge.purger', '@config.factory', '@state']
+
+  bootstrap_purge.runtime_collector:
+    class: Drupal\bootstrap_purge\Service\RuntimeDataCollector
+    arguments: ['@database', '@config.factory', '@logger.factory']
+
+  bootstrap_purge.whitelist_manager:
+    class: Drupal\bootstrap_purge\Service\WhitelistManager
+    arguments: ['@config.factory']

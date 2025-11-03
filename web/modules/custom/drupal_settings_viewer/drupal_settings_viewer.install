@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the drupal_settings_viewer module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function drupal_settings_viewer_requirements($phase) {
+  $requirements = [];
+
+  if ($phase == 'runtime') {
+    // Check if toolbar module is enabled.
+    if (!\Drupal::moduleHandler()->moduleExists('toolbar')) {
+      $requirements['drupal_settings_viewer_toolbar'] = [
+        'title' => t('Drupal Settings Viewer'),
+        'value' => t('Toolbar module required'),
+        'description' => t('The Drupal Settings Viewer module requires the Toolbar module to be enabled.'),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+    else {
+      $requirements['drupal_settings_viewer_toolbar'] = [
+        'title' => t('Drupal Settings Viewer'),
+        'value' => t('Toolbar module enabled'),
+        'severity' => REQUIREMENT_OK,
+      ];
+    }
+
+    // Security warning for production sites.
+    $requirements['drupal_settings_viewer_security'] = [
+      'title' => t('Drupal Settings Viewer Security'),
+      'value' => t('Development tool enabled'),
+      'description' => t('The Drupal Settings Viewer module is enabled. This module exposes drupalSettings data and should only be used in development environments. Ensure proper permissions are set and consider disabling on production sites.'),
+      'severity' => REQUIREMENT_WARNING,
+    ];
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function drupal_settings_viewer_install() {
+  // Display a message about security considerations.
+  \Drupal::messenger()->addWarning(t('The Drupal Settings Viewer module has been installed. Please ensure you grant the "Access Drupal Settings Viewer" permission only to trusted developers and administrators. This module should primarily be used in development environments.'));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function drupal_settings_viewer_uninstall() {
+  // Clean up any configuration or cache entries if needed.
+  // Currently, this module doesn't create any persistent configuration.
+  \Drupal::messenger()->addStatus(t('The Drupal Settings Viewer module has been uninstalled successfully.'));
+}

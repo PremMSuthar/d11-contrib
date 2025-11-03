@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * @file
+ * Bootstrap Purge module for optimizing CSS/JS assets.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Asset\AttachedAssetsInterface;
+
+/**
+ * Implements hook_help().
+ */
+function bootstrap_purge_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.bootstrap_purge':
+      return '<p>' . t('Bootstrap Purge automatically detects and removes unused CSS and JS to reduce payload size and speed up rendering.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function bootstrap_purge_library_info_alter(&$libraries, $extension) {
+  $config = \Drupal::config('bootstrap_purge.settings');
+  $purge_service = \Drupal::service('bootstrap_purge.asset_manager');
+  
+  if (!$config->get('enabled') || !$config->get('auto_apply')) {
+    return;
+  }
+
+  // Get purged asset mappings
+  $mappings = $purge_service->getPurgedAssetMappings();
+  
+  foreach ($libraries as $library_name => &$library) {
+    // Process CSS files
+    if (isset($library['css'])) {
+      foreach ($library['css'] as $category => &$files) {
+        foreach ($files as $file_path => &$file_info) {
+          $mapping_key = $extension . '/' . $library_name . '/' . $file_path;
+          if (isset($mappings[$mapping_key])) {
+            $purged_file = $mappings[$mapping_key];
+            // Replace with purged version
+            unset($files[$file_path]);
+            $files[$purged_file['path']] = $file_info;
+          }
+        }
+      }
+    }
+    
+    // Process JS files
+    if (isset($library['js'])) {
+      foreach ($library['js'] as $file_path => &$file_info) {
+        $mapping_key = $extension . '/' . $library_name . '/' . $file_path;
+        if (isset($mappings[$mapping_key])) {
+          $purged_file = $mappings[$mapping_key];
+          // Replace with purged version
+          unset($library['js'][$file_path]);
+          $library['js'][$purged_file['path']] = $file_info;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function bootstrap_purge_page_attachments_alter(array &$attachments) {
+  $config = \Drupal::config('bootstrap_purge.settings');
+  
+  if (!$config->get('enabled') || !$config->get('runtime_collection_enabled')) {
+    return;
+  }
+  
+  // Add runtime collection script if enabled and user is in sample
+  $current_user = \Drupal::currentUser();
+  $sample_rate = $config->get('runtime_sample_rate') ?: 10;
+  
+  // Simple sampling based on user ID
+  if ($current_user->isAuthenticated() && ($current_user->id() % 100) < $sample_rate) {
+    $attachments['#attached']['library'][] = 'bootstrap_purge/runtime_collector';
+    $attachments['#attached']['drupalSettings']['bootstrapPurge'] = [
+      'endpoint' => \Drupal\Core\Url::fromRoute('bootstrap_purge.runtime_data')->toString(),
+      'route' => \Drupal::routeMatch()->getRouteName(),
+    ];
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function bootstrap_purge_cron() {
+  $config = \Drupal::config('bootstrap_purge.settings');
+  
+  if (!$config->get('enabled') || !$config->get('auto_analyze_cron')) {
+    return;
+  }
+  
+  $last_run = \Drupal::state()->get('bootstrap_purge.last_cron_run', 0);
+  $interval = $config->get('cron_interval') ?: 86400; // Default 24 hours
+  
+  if (REQUEST_TIME - $last_run > $interval) {
+    $analyzer = \Drupal::service('bootstrap_purge.analyzer');
+    $analyzer->analyzeAssets(['routes' => 'key']);
+    \Drupal::state()->set('bootstrap_purge.last_cron_run', REQUEST_TIME);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function bootstrap_purge_theme() {
+  return [
+    'bootstrap_purge_dashboard' => [
+      'variables' => [
+        'stats' => NULL,
+        'recent_purges' => NULL,
+      ],
+      'template' => 'bootstrap-purge-dashboard',
+    ],
+    'bootstrap_purge_asset_diff' => [
+      'variables' => [
+        'original_content' => NULL,
+        'purged_content' => NULL,
+        'removed_selectors' => NULL,
+        'file_path' => NULL,
+      ],
+      'template' => 'bootstrap-purge-asset-diff',
+    ],
+  ];
+}

@@ -1,0 +1,355 @@
+{#
+/**
+ * @file
+ * Template for Site Analyzer detailed reports.
+ *
+ * Available variables:
+ * - report_type: Type of report (system, modules, themes, etc.)
+ * - report_data: The analysis data
+ * - recommendations: Array of recommendations
+ */
+#}
+
+<div class="site-analyzer-report report-{{ report_type }}">
+  <div class="report-header">
+    <h1>{{ report_type|title }} {{ 'Analysis Report'|t }}</h1>
+    <div class="report-meta">
+      <span class="report-date">{{ 'Generated on'|t }} {{ "now"|date("Y-m-d H:i:s") }}</span>
+    </div>
+  </div>
+  
+  {# Include Site Analyzer navigation after the title #}
+  {% if site_analyzer_navigation %}
+    {% include '@site_analyzer/site-analyzer-navigation.html.twig' with {
+      'navigation_items': site_analyzer_navigation.navigation_items,
+      'current_page': site_analyzer_navigation.current_page
+    } %}
+  {% endif %}
+
+  {% if recommendations and recommendations|length > 0 %}
+  <div class="recommendations-section">
+    <h3>{{ 'Recommendations'|t }}</h3>
+    <div class="recommendations-list">
+      {% for recommendation in recommendations %}
+      <div class="recommendation recommendation-{{ recommendation.type }}">
+        <div class="recommendation-icon">
+          {% if recommendation.type == 'error' %}
+            ⚠️
+          {% elseif recommendation.type == 'warning' %}
+            ⚡
+          {% else %}
+            ℹ️
+          {% endif %}
+        </div>
+        <div class="recommendation-content">
+          <p>{{ recommendation.message }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="report-content">
+    {% if report_type == 'system' %}
+      {{ _self.render_system_report(report_data) }}
+    {% elseif report_type == 'modules' %}
+      {{ _self.render_modules_report(report_data) }}
+    {% elseif report_type == 'themes' %}
+      {{ _self.render_themes_report(report_data) }}
+    {% elseif report_type == 'content' %}
+      {{ _self.render_content_report(report_data) }}
+    {% elseif report_type == 'database' %}
+      {{ _self.render_database_report(report_data) }}
+    {% elseif report_type == 'security' %}
+      {{ _self.render_security_report(report_data) }}
+    {% elseif report_type == 'performance' %}
+      {{ _self.render_performance_report(report_data) }}
+    {% endif %}
+  </div>
+</div>
+
+{# System Report Template #}
+{% macro render_system_report(data) %}
+<div class="system-report">
+  <div class="report-section">
+    <h3>{{ 'Drupal Information'|t }}</h3>
+    <table class="report-table">
+      <tr>
+        <td>{{ 'Version'|t }}</td>
+        <td>{{ data.drupal_version.version }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Release Date'|t }}</td>
+        <td>{{ data.drupal_version.release_date }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Development Version'|t }}</td>
+        <td>{{ data.drupal_version.is_dev ? 'Yes'|t : 'No'|t }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="report-section">
+    <h3>{{ 'PHP Information'|t }}</h3>
+    <table class="report-table">
+      <tr>
+        <td>{{ 'Version'|t }}</td>
+        <td>{{ data.php_version.version }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'SAPI'|t }}</td>
+        <td>{{ data.php_version.sapi }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Memory Limit'|t }}</td>
+        <td>{{ data.php_version.memory_limit }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Max Execution Time'|t }}</td>
+        <td>{{ data.php_version.max_execution_time }} {{ 'seconds'|t }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="report-section">
+    <h3>{{ 'Database Information'|t }}</h3>
+    <table class="report-table">
+      <tr>
+        <td>{{ 'Driver'|t }}</td>
+        <td>{{ data.database_info.driver }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Version'|t }}</td>
+        <td>{{ data.database_info.version }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Host'|t }}</td>
+        <td>{{ data.database_info.host }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Database Size'|t }}</td>
+        <td>{{ data.database_info.size }} MB</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="report-section">
+    <h3>{{ 'Memory Usage'|t }}</h3>
+    <div class="memory-stats">
+      <div class="memory-bar">
+        <div class="memory-used" style="width: {{ data.memory_info.usage_percentage }}%"></div>
+      </div>
+      <table class="report-table">
+        <tr>
+          <td>{{ 'Current Usage'|t }}</td>
+          <td>{{ data.memory_info.current_usage_formatted }}</td>
+        </tr>
+        <tr>
+          <td>{{ 'Peak Usage'|t }}</td>
+          <td>{{ data.memory_info.peak_usage_formatted }}</td>
+        </tr>
+        <tr>
+          <td>{{ 'Limit'|t }}</td>
+          <td>{{ data.memory_info.limit_formatted }}</td>
+        </tr>
+        <tr>
+          <td>{{ 'Available'|t }}</td>
+          <td>{{ data.memory_info.available_formatted }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{# Modules Report Template #}
+{% macro render_modules_report(data) %}
+<div class="modules-report">
+  <div class="report-summary">
+    <div class="summary-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{ data.total_count }}</span>
+        <span class="stat-label">{{ 'Total Modules'|t }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ data.enabled_count }}</span>
+        <span class="stat-label">{{ 'Enabled'|t }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ data.custom_modules|length }}</span>
+        <span class="stat-label">{{ 'Custom'|t }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ data.security_updates|length }}</span>
+        <span class="stat-label">{{ 'Security Updates'|t }}</span>
+      </div>
+    </div>
+  </div>
+
+  {% if data.security_updates|length > 0 %}
+  <div class="report-section alert-section">
+    <h3>{{ 'Security Updates Available'|t }}</h3>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>{{ 'Module'|t }}</th>
+          <th>{{ 'Current Version'|t }}</th>
+          <th>{{ 'Security Version'|t }}</th>
+          <th>{{ 'Severity'|t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for module_name, module in data.security_updates %}
+        <tr>
+          <td>{{ module.display_name }}</td>
+          <td>{{ module.version }}</td>
+          <td>{{ module.latest_version }}</td>
+          <td><span class="severity severity-{{ module.severity }}">{{ module.severity|title }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if data.deprecated_modules|length > 0 %}
+  <div class="report-section warning-section">
+    <h3>{{ 'Deprecated Modules'|t }}</h3>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>{{ 'Module'|t }}</th>
+          <th>{{ 'Status'|t }}</th>
+          <th>{{ 'Replacement'|t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for module_name, module in data.deprecated_modules %}
+        <tr>
+          <td>{{ module.display_name }}</td>
+          <td>{{ module.status|title }}</td>
+          <td>{{ 'Manual review required'|t }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if data.custom_modules|length > 0 %}
+  <div class="report-section">
+    <h3>{{ 'Custom Modules'|t }}</h3>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>{{ 'Module'|t }}</th>
+          <th>{{ 'Path'|t }}</th>
+          <th>{{ 'Status'|t }}</th>
+          <th>{{ 'File Count'|t }}</th>
+          <th>{{ 'Size'|t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for module_name, module in data.custom_modules %}
+        <tr>
+          <td>{{ module.display_name }}</td>
+          <td><code>{{ module.path }}</code></td>
+          <td>{{ module.status|title }}</td>
+          <td>{{ module.file_count }}</td>
+          <td>{{ (module.size / 1024)|round(1) }} KB</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{# Additional macros for other report types would go here... #}
+{% macro render_themes_report(data) %}
+<div class="themes-report">
+  <div class="report-summary">
+    <div class="summary-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{ data.total_count }}</span>
+        <span class="stat-label">{{ 'Total Themes'|t }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ data.enabled_count }}</span>
+        <span class="stat-label">{{ 'Enabled'|t }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ data.custom_themes|length }}</span>
+        <span class="stat-label">{{ 'Custom'|t }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-section">
+    <h3>{{ 'Active Themes'|t }}</h3>
+    <table class="report-table">
+      <tr>
+        <td>{{ 'Default Theme'|t }}</td>
+        <td>{{ data.default_theme }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'Admin Theme'|t }}</td>
+        <td>{{ data.admin_theme ?: 'Default'|t }}</td>
+      </tr>
+    </table>
+  </div>
+
+  {% if data.custom_themes|length > 0 %}
+  <div class="report-section">
+    <h3>{{ 'Custom Themes'|t }}</h3>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>{{ 'Theme'|t }}</th>
+          <th>{{ 'Path'|t }}</th>
+          <th>{{ 'Base Theme'|t }}</th>
+          <th>{{ 'Templates'|t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for theme_name, theme in data.custom_themes %}
+        <tr>
+          <td>{{ theme.display_name }}</td>
+          <td><code>{{ theme.path }}</code></td>
+          <td>{{ theme.base_theme ?: 'None'|t }}</td>
+          <td>{{ theme.template_overrides|length }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{# Placeholder macros for other report types #}
+{% macro render_content_report(data) %}
+<div class="content-report">
+  <p>{{ 'Content analysis report details would be displayed here.'|t }}</p>
+</div>
+{% endmacro %}
+
+{% macro render_database_report(data) %}
+<div class="database-report">
+  <p>{{ 'Database analysis report details would be displayed here.'|t }}</p>
+</div>
+{% endmacro %}
+
+{% macro render_security_report(data) %}
+<div class="security-report">
+  <p>{{ 'Security analysis report details would be displayed here.'|t }}</p>
+</div>
+{% endmacro %}
+
+{% macro render_performance_report(data) %}
+<div class="performance-report">
+  <p>{{ 'Performance analysis report details would be displayed here.'|t }}</p>
+</div>
+{% endmacro %}

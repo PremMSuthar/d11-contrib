@@ -1,0 +1,80 @@
+bootstrap_purge.settings:
+  type: config_object
+  label: 'Bootstrap Purge settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Enable Bootstrap Purge'
+    auto_apply:
+      type: boolean
+      label: 'Automatically apply approved purges'
+    analysis_mode:
+      type: string
+      label: 'Analysis mode'
+    snapshot_routes:
+      type: sequence
+      label: 'Routes to snapshot for analysis'
+      sequence:
+        type: string
+    runtime_collection_enabled:
+      type: boolean
+      label: 'Enable runtime data collection'
+    runtime_sample_rate:
+      type: integer
+      label: 'Runtime collection sample rate (percentage)'
+    auto_analyze_cron:
+      type: boolean
+      label: 'Run analysis during cron'
+    cron_interval:
+      type: integer
+      label: 'Cron analysis interval (seconds)'
+    confidence_threshold:
+      type: integer
+      label: 'Confidence threshold for auto-approval'
+    storage_path:
+      type: string
+      label: 'Storage path for purged assets'
+    purgecss_path:
+      type: string
+      label: 'Path to PurgeCSS executable'
+    node_path:
+      type: string
+      label: 'Path to Node.js executable'
+    whitelist_patterns:
+      type: sequence
+      label: 'Global whitelist patterns'
+      sequence:
+        type: string
+    bootstrap_whitelist:
+      type: sequence
+      label: 'Bootstrap-specific whitelist patterns'
+      sequence:
+        type: string
+
+bootstrap_purge.whitelist:
+  type: config_object
+  label: 'Bootstrap Purge whitelist'
+  mapping:
+    global_patterns:
+      type: sequence
+      label: 'Global whitelist patterns'
+      sequence:
+        type: string
+    theme_patterns:
+      type: mapping
+      label: 'Theme-specific patterns'
+      mapping:
+        '[theme_name]':
+          type: sequence
+          sequence:
+            type: string
+    selector_patterns:
+      type: sequence
+      label: 'CSS selector patterns'
+      sequence:
+        type: string
+    js_function_patterns:
+      type: sequence
+      label: 'JavaScript function patterns'
+      sequence:
+        type: string

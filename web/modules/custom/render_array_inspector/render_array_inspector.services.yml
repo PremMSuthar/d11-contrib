@@ -1,0 +1,4 @@
+services:
+  render_array_inspector.controller:
+    class: Drupal\render_array_inspector\Controller\RenderArrayInspectorController
+    arguments: ['@renderer']

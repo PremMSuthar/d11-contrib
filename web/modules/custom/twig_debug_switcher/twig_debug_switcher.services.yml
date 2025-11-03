@@ -1,0 +1,16 @@
+services:
+  twig_debug_switcher.twig_debug_manager:
+    class: Drupal\twig_debug_switcher\TwigDebugManager
+    arguments: ['@config.factory', '@kernel', '@messenger', '@cache.default']
+
+  twig_debug_switcher.commands:
+    class: Drupal\twig_debug_switcher\Commands\TwigDebugSwitcherCommands
+    arguments: ['@twig_debug_switcher.twig_debug_manager']
+    tags:
+      - { name: drush.command }
+
+  twig_debug_switcher.event_subscriber:
+    class: Drupal\twig_debug_switcher\EventSubscriber\TwigDebugEventSubscriber
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }
